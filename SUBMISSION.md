@@ -1,6 +1,7 @@
 # MilestoneMatch submission draft
 
-**Live demo:** https://milestone-match.onrender.com/  
+**Live demo:** https://milestone-match.onrender.com/
+
 **Source branch:** https://github.com/TejaswiniVasu/MilestoneMatch/tree/improve-evidence-review
 
 The entrant verified the hosted Sandbox checkout and downloaded record on
