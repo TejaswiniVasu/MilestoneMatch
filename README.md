@@ -152,8 +152,11 @@ valid claims, including dates or conditional language.
 
 ## Hosting preparation
 
-`render.yaml` prepares a single Render service with `/health`. It has **not been
-deployed**. Set fresh Sandbox credentials privately in Render's environment
+`render.yaml` configures a single Render service with `/health`. Its build command
+creates the dashboard bundles and runs checks; its runtime command launches
+`node server.mjs` directly so the free 512 MB instance does not rebuild bundles
+through the local `npm start` prestart hook. A successful public deployment still
+needs verification. Set fresh Sandbox credentials privately in Render's environment
 settings. Render supplies `RENDER_EXTERNAL_URL` for callbacks and origin checks.
 For another host, set `HOST=0.0.0.0`, `PORT`, and `APP_ORIGIN` to the exact public
 HTTPS origin without a path. Do not derive it from incoming request headers.

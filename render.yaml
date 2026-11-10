@@ -4,7 +4,9 @@ services:
     runtime: node
     plan: free
     buildCommand: npm ci --include=dev && npm run build && npm test && npm run evaluate
-    startCommand: npm start
+    # Bundles are produced during the build, outside the 512 MB web runtime.
+    # npm start runs prestart and would unnecessarily rebuild them here.
+    startCommand: node server.mjs
     healthCheckPath: /health
     envVars:
       - key: NODE_VERSION
