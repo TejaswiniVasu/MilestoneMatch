@@ -150,13 +150,15 @@ named requirements (screenshots, Android, iPhone, Lighthouse); they do not inspe
 artifacts or understand every acceptance criterion. Conservative rules can block
 valid claims, including dates or conditional language.
 
-## Hosting preparation
+## Hosted demo
 
 `render.yaml` configures a single Render service with `/health`. Its build command
 creates the dashboard bundles and runs checks; its runtime command launches
 `node server.mjs` directly so the free 512 MB instance does not rebuild bundles
-through the local `npm start` prestart hook. A successful public deployment still
-needs verification. Set fresh Sandbox credentials privately in Render's environment
+through the local `npm start` prestart hook. The public demo is [milestone-match.onrender.com](https://milestone-match.onrender.com/).
+On November 10, 2026, the entrant completed a hosted USD 240.00 Sandbox
+capture and supplied its downloaded record: USD 150 design and USD 90 staging
+approved, with USD 60 remaining unpaid. Set fresh Sandbox credentials privately in Render's environment
 settings. Render supplies `RENDER_EXTERNAL_URL` for callbacks and origin checks.
 For another host, set `HOST=0.0.0.0`, `PORT`, and `APP_ORIGIN` to the exact public
 HTTPS origin without a path. Do not derive it from incoming request headers.

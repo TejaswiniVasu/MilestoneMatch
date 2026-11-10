@@ -1,5 +1,14 @@
 # MilestoneMatch submission draft
 
+**Live demo:** https://milestone-match.onrender.com/  
+**Source branch:** https://github.com/TejaswiniVasu/MilestoneMatch/tree/improve-evidence-review
+
+The entrant verified the hosted Sandbox checkout and downloaded record on
+November 10, 2026: USD 240.00 captured for design and staging, USD 60 unpaid.
+The free service may take about a minute to wake; start a fresh review after a
+restart. Analytics and timeline integrations require the local setup and their
+documented licensing conditions; do not assume they are available on the host.
+
 **Tagline**  
 Turn a messy freelance delivery update into an evidence-backed partial payment.
 
@@ -68,7 +77,7 @@ Record a completed test capture before using this script. Prepare a sandbox buye
 ## Check before submitting
 
 - [ ] Run the application from a fresh checkout and complete a real Sandbox purchase using a personal test buyer.
-- [ ] Confirm the UI, PayPal approval page, receipt, and export all show $240.00 and that the two unapproved items remain unpaid.
+- [x] Entrant confirmed the hosted receipt and export show USD 240.00 captured for the two approved items; USD 60.00 remains unpaid.
 - [ ] Try the sample with the archive described as finished and check that the review offers it for approval after rerunning the match.
 - [ ] Publish a public GitHub repository with all source and setup instructions. Confirm GitHub recognizes the root MIT license and the public source contains no `.env` or credentials.
 - [ ] Add the repository URL and public YouTube link to the existing Devpost draft.
@@ -87,7 +96,7 @@ The official judging rubric gives equal weight to implementation, design, impact
   used for the SDK migration. Channel3, Render Workflows and Studio's
   agent framework remain pending. Do not claim roadmap features as implemented.
   See [AWARDS.md](AWARDS.md) for the exact status and licensing prerequisites.
-- Real user feedback, updated external Sandbox capture, a recorded video and
+- Real user feedback, a recorded video and
   final Devpost submission remain outstanding.
 
 [Official rules](https://paypalaihackathon.devpost.com/rules) · [Schedule](https://paypalaihackathon.devpost.com/details/dates)
