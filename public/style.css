@@ -1,0 +1,84 @@
+:root {
+  color-scheme: light;
+  --ink: #182a22;
+  --muted: #526057;
+  --paper: #f8f7f2;
+  --line: #dde1d8;
+  --green: #22543d;
+  --soft-green: #eaf3e5;
+  --red: #922e27;
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 15px/1.55 system-ui, sans-serif; }
+.frame { max-width: 1240px; margin: 0 auto; padding: 0 35px; }
+.topbar { border-bottom: 1px solid var(--line); }
+.top-inner { min-height: 70px; display: flex; align-items: center; justify-content: space-between; gap: 15px; }
+.brand { display: inline-flex; align-items: center; gap: 11px; font-size: 18px; font-weight: 750; color: var(--ink); text-decoration: none; }
+.sandbox, .model-badge { display: inline-flex; align-items: center; gap: 7px; padding: 5px 10px; border: 1px solid var(--line); border-radius: 99px; font-size: 12px; font-weight: 700; }
+.sandbox span { width: 7px; height: 7px; border-radius: 50%; background: #46724d; }
+.intro { display: grid; grid-template-columns: 1.5fr 1fr; align-items: end; gap: 30px; padding: 34px 0 32px; }
+.eyebrow { margin: 0 0 7px; color: var(--green); font-size: 11px; line-height: 1.4; font-weight: 800; letter-spacing: .13em; }
+.intro .eyebrow span { color: #475c4a; }
+h1, h2, h3, p { margin: 0; }
+h1 { margin: 11px 0 12px; font: 500 clamp(2.45rem, 6.5vw, 4.5rem)/.97 Georgia, serif; letter-spacing: -.065em; }
+h1 em { color: var(--green); font-weight: inherit; }
+.lede { max-width: 480px; color: var(--muted); }
+.intro-side { padding: 16px 0 3px 22px; border-left: 1px solid #a9baaa; justify-self: end; width: 100%; max-width: 390px; }
+.intro-side ol { padding: 0; margin: 4px 0 0; list-style: none; }
+.intro-side li { margin: 4px 0; font-weight: 600; }
+.intro-side li span { display: inline-block; width: 31px; color: var(--green); font: 700 12px/1.4 monospace; }
+.workspace { display: grid; grid-template-columns: minmax(0, 0.88fr) minmax(0, 1.12fr); align-items: start; gap: 18px; }
+.card { background: #fff; border: 1px solid var(--line); border-radius: 16px; padding: 21px; box-shadow: 0 4px 16px #263e2510; }
+.card-heading { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 10px; margin-bottom: 15px; }
+.card-heading .eyebrow { margin-bottom: 4px; }
+h2 { font: 500 31px/1.08 Georgia, serif; letter-spacing: -.045em; }
+h3 { font-size: 17px; }
+button, input, textarea { font: inherit; }
+button { cursor: pointer; }
+button:disabled { cursor: default; opacity: .55; }
+:focus-visible { outline: 3px solid #6b956b; outline-offset: 3px; }
+.text-button { background: var(--soft-green); color: var(--green); border: 0; border-radius: 7px; padding: 7px 10px; font-size: 12px; font-weight: 750; }
+form label { display: flex; justify-content: space-between; align-items: baseline; font-size: 13px; font-weight: 750; margin: 12px 0 4px; }
+form label span { font: 700 11px monospace; color: var(--muted); }
+input:not([type=checkbox]), textarea { display: block; width: 100%; padding: 9px 10px; border: 1px solid #d2d9d0; border-radius: 7px; color: var(--ink); background: #fbfcfa; }
+textarea { resize: vertical; min-height: 70px; font-size: 13px; }
+.field-help, .ledger-note, .checkout p { margin-top: 4px; color: var(--muted); font-size: 12px; }
+.field-help code { color: var(--green); font-size: 11px; }
+.button { border: 0; display: inline-flex; gap: 12px; align-items: center; justify-content: center; padding: 9px 13px; border-radius: 7px; font-weight: 750; font-size: 13px; }
+.primary { background: var(--green); color: #fff; }
+.primary:hover:enabled { background: #163a2b; }
+form .primary, .checkout .primary { margin-top: 13px; }
+.model-badge { color: var(--green); background: var(--soft-green); border-color: #d9e6d2; font-size: 10px; letter-spacing: .12em; }
+.empty { min-height: 320px; display: grid; align-content: center; justify-items: center; text-align: center; gap: 8px; padding: 24px; border: 1px dashed #c4d0c4; border-radius: 10px; color: var(--green); background: #f8fbf5; }
+.empty p { max-width: 280px; color: var(--muted); font-size: 13px; }
+.ledger-note { margin: 0 0 10px; }
+.evidence-row { border-top: 1px solid var(--line); padding: 9px 0; }
+.row-heading { display: grid; grid-template-columns: 21px minmax(0, 1fr) auto; align-items: start; gap: 5px; }
+.row-heading label, .row-title { font-weight: 720; overflow-wrap: anywhere; font-size: 13px; }
+.row-heading input { margin: 4px 0 0; width: 14px; height: 14px; accent-color: var(--green); }
+.amount { padding-left: 5px; font: 750 13px/1.6 monospace; }
+.detail { margin: 3px 0 0 26px; font-size: 12px; color: var(--muted); overflow-wrap: anywhere; }
+.chip { display: inline-block; padding: 1px 7px; margin-right: 6px; border-radius: 4px; font-size: 10px; font-weight: 750; color: #625031; background: #f6efe0; }
+.chip.candidate { color: var(--green); background: var(--soft-green); }
+.chip.missing { color: var(--red); background: #faeeea; }
+.summary { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 6px; margin: 10px 0; }
+.summary div { min-width: 0; padding: 7px 8px; background: #f5f5f1; border-radius: 6px; }
+.summary span { display: block; font-size: 11px; color: var(--muted); }
+.summary strong { font-size: clamp(.88rem, 2vw, 1.2rem); }
+.summary .approved { background: var(--soft-green); color: var(--green); }
+.checkout { border-top: 1px solid var(--line); padding-top: 12px; }
+.checkout .eyebrow { margin: 0 0 3px; color: var(--green); }
+.error, .checkout .error { color: var(--red); font-size: 13px; margin-top: 7px; }
+.receipt { color: var(--green); background: var(--soft-green); border: 1px solid #cfdfc7; border-radius: 8px; padding: 10px; margin-top: 10px; overflow-wrap: anywhere; }
+.receipt p { margin-top: 2px; }
+.export { margin-top: 8px; }
+footer { display: flex; justify-content: space-between; gap: 10px; flex-wrap: wrap; padding: 18px 0 22px; color: var(--muted); font-size: 11px; }
+@media (max-width: 730px) {
+  .frame { padding: 0 18px; }
+  .intro { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
+  .intro-side { justify-self: start; padding: 2px 0 1px 13px; }
+  .workspace { grid-template-columns: 1fr; gap: 13px; }
+  .card { padding: 15px; }
+  .empty { min-height: 190px; }
+}

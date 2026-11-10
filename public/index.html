@@ -1,0 +1,93 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#f8f7f2">
+  <title>MilestoneMatch — Freelance payment review</title>
+  <link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <link rel="stylesheet" href="/style.css">
+  <script type="module" src="/app.js"></script>
+</head>
+<body>
+  <header class="topbar">
+    <div class="frame top-inner">
+      <a class="brand" href="/"><img src="/mark.svg" width="35" height="35" alt=""> MilestoneMatch</a>
+      <span class="sandbox"><span></span> PayPal Sandbox</span>
+    </div>
+  </header>
+  <main class="frame">
+    <section class="intro">
+      <div>
+        <p class="eyebrow"><span>01</span> &nbsp; THE FREELANCE PAYMENT DESK</p>
+        <h1>Review the work.<br><em>Then pay for it.</em></h1>
+        <p class="lede">Match a delivery update to the agreed scope. Review the evidence, approve individual items, and pay the approved total.</p>
+      </div>
+      <div class="intro-side">
+        <p class="eyebrow">FROM UPDATE TO RECEIPT</p>
+        <ol>
+          <li><span>01</span> Add scope and update</li>
+          <li><span>02</span> Review AI evidence matches</li>
+          <li><span>03</span> Approve and pay in Sandbox</li>
+        </ol>
+      </div>
+    </section>
+    <div class="workspace">
+      <section class="card intake" aria-labelledby="scope-title">
+        <div class="card-heading">
+          <div><p class="eyebrow">01 / INPUT</p><h2 id="scope-title">Project details</h2></div>
+          <button class="text-button" type="button" id="sample">Load example</button>
+        </div>
+        <form id="intake">
+          <label for="title">Project name</label>
+          <input name="title" id="title" required maxlength="80" placeholder="Northstar landing page">
+          <label for="scope">Agreed scope <span>USD</span></label>
+          <textarea name="scope" id="scope" rows="5" required maxlength="2400" aria-describedby="scope-help" placeholder="150.00 | Deliver high-fidelity design mockups"></textarea>
+          <p class="field-help" id="scope-help">One item per line in <code>amount | deliverable</code> format.</p>
+          <label for="delivery">Delivery update</label>
+          <textarea name="delivery" id="delivery" rows="4" maxlength="4000" aria-describedby="update-help" placeholder="The final design frames are shared in the editable prototype."></textarea>
+          <p class="field-help" id="update-help">Paste one delivery claim per line. Use synthetic examples for this demo.</p>
+          <button class="button primary" id="review-button" type="submit">Match delivery evidence <span aria-hidden="true">→</span></button>
+          <p class="error" id="intake-error" role="alert" hidden></p>
+        </form>
+      </section>
+      <section class="card results" aria-labelledby="results-title">
+        <div class="card-heading">
+          <div><p class="eyebrow">02 / REVIEW</p><h2 id="results-title">Evidence ledger</h2></div>
+          <span class="model-badge">LOCAL AI</span>
+        </div>
+        <div id="empty" class="empty">
+          <svg viewBox="0 0 64 64" width="57" height="57" fill="none" aria-hidden="true">
+            <rect x="13" y="9" width="38" height="46" rx="6" stroke="currentColor" stroke-width="2"/>
+            <path d="M23 23h18M23 32h18M23 41h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
+            <circle cx="49" cy="48" r="8" fill="#e1eddd" stroke="currentColor" stroke-width="2"/>
+            <path d="m46 48 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          </svg>
+          <h3>Scope and evidence, side by side</h3>
+          <p>Run a review to see which items have a delivery claim, which are pending, and which need more evidence.</p>
+        </div>
+        <div id="ledger" hidden>
+          <p class="ledger-note">Check the source lines yourself, then select the items you approve. A match only identifies a claim in the update.</p>
+          <div id="items"></div>
+          <div class="summary" aria-live="polite">
+            <div><span>Agreed</span><strong id="total">$0.00</strong></div>
+            <div class="approved"><span>Approved now</span><strong id="approved">$0.00</strong></div>
+            <div><span>Unpaid</span><strong id="held">$0.00</strong></div>
+          </div>
+          <section class="checkout" aria-labelledby="checkout-title">
+            <p class="eyebrow">03 / PAYMENT</p>
+            <h3 id="checkout-title">Sandbox checkout</h3>
+            <p id="payment-note" role="status"></p>
+            <button class="button primary" id="checkout" type="button" disabled>Continue to PayPal Sandbox <span aria-hidden="true">↗</span></button>
+            <button class="button primary" id="capture" type="button" hidden>Capture sandbox payment <span aria-hidden="true">→</span></button>
+            <p class="error" id="payment-error" role="alert" hidden></p>
+            <div class="receipt" id="receipt" hidden></div>
+            <button class="text-button export" id="export" type="button" hidden>Download payment record ↓</button>
+          </section>
+        </div>
+      </section>
+    </div>
+    <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · One review per checkout</span></footer>
+  </main>
+</body>
+</html>
