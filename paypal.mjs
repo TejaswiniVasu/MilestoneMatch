@@ -1,57 +1,65 @@
+import {
+  ApiError, CheckoutPaymentIntent, Client, Environment, OrdersController,
+  PaypalExperienceUserAction, PaypalWalletContextShippingPreference,
+} from '@paypal/paypal-server-sdk';
 import { AppError, dollars } from './review.mjs';
 
-const sandbox = 'https://api-m.sandbox.paypal.com';
-const orderPath = '/v2/checkout/orders';
-
-class PayPalError extends Error {
-  constructor(body) {
-    super('PayPal Sandbox rejected the request.');
-    this.issues = new Set((body?.details ?? []).map(({ issue }) => issue));
+function issuesFrom(error) {
+  let body = error.result;
+  if (!body && typeof error.body === 'string') {
+    try { body = JSON.parse(error.body); } catch { /* Non-JSON upstream failure. */ }
   }
+  return new Set((Array.isArray(body?.details) ? body.details : []).map((detail) => detail?.issue));
 }
 
-export function paypalClient({ clientId, clientSecret, origin, request = fetch }) {
+export function paypalClient({ clientId, clientSecret, origin, request }) {
   const configured = Boolean(clientId && clientSecret);
-  let token;
-  let expiresAt = 0;
+  const configuration = {
+    environment: Environment.Sandbox,
+    timeout: 12_000,
+    clientCredentialsAuthCredentials: {
+      oAuthClientId: clientId || '', oAuthClientSecret: clientSecret || '', oAuthClockSkew: 60,
+    },
+    httpClientOptions: { timeout: 12_000, retryConfig: { maxNumberOfRetries: 0 } },
+  };
+  // Tests inject the transport under the real SDK: auth, serialization, response
+  // schemas and error mapping still run. Production uses the SDK's HTTP adapter.
+  if (request) configuration.unstable_httpClientOptions = {
+    adapter: async (config) => {
+      const response = await request(config.url, {
+        method: config.method.toUpperCase(), headers: config.headers,
+        body: config.data, signal: config.signal,
+      });
+      return { data: await response.text(), status: response.status, statusText: response.statusText,
+        headers: Object.fromEntries(response.headers), config };
+    },
+  };
+  let orders;
+  function resetClient() { orders = new OrdersController(new Client(configuration)); }
+  resetClient();
 
-  async function call(path, options) {
-    const response = await request(sandbox + path, { ...options, signal: AbortSignal.timeout(12_000) });
-    const data = await response.json();
-    if (!response.ok) throw new PayPalError(data);
-    return data;
-  }
-
-  async function authorize() {
+  async function call(method, params) {
     if (!configured) throw new AppError(503, 'Set the PayPal Sandbox credentials in .env and restart the app.');
-    if (Date.now() < expiresAt) return token;
-    const credentials = Buffer.from(clientId + ':' + clientSecret).toString('base64');
-    const result = await call('/v1/oauth2/token', {
-      method: 'POST',
-      headers: {
-        Authorization: 'Basic ' + credentials,
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: 'grant_type=client_credentials',
-    });
-    token = result.access_token;
-    expiresAt = Date.now() + Math.max(0, result.expires_in - 60) * 1000;
-    return token;
-  }
-
-  async function orderRequest(path, { payload, requestId } = {}) {
-    const headers = { Authorization: 'Bearer ' + await authorize() };
-    if (!requestId) return call(path, { headers });
-    return call(path, {
-      method: 'POST',
-      headers: {
-        ...headers,
-        'Content-Type': 'application/json',
-        'PayPal-Request-Id': requestId,
-        Prefer: 'return=representation',
-      },
-      body: JSON.stringify(payload ?? {}),
-    });
+    const controller = orders;
+    try {
+      return (await controller[method](params, { abortSignal: AbortSignal.timeout(12_000) })).result;
+    } catch (error) {
+      // OAuth failures can leave a rejected token promise cached by this SDK.
+      // Rebuild after auth/transport failures so a user retry can recover.
+      const tokenRequest = String(error.request?.url ?? error.config?.url ?? '').includes('/v1/oauth2/token');
+      if (orders === controller && (tokenRequest || !(error instanceof ApiError) || [401, 403].includes(error.statusCode))) resetClient();
+      if (error instanceof ApiError) {
+        const issues = issuesFrom(error);
+        if (error.statusCode === 401) throw new AppError(503, 'PayPal rejected the Sandbox credentials. Check the app Client ID and Secret in .env, then restart.');
+        if (issues.has('UNSUPPORTED_PAYEE_CURRENCY') || issues.has('CURRENCY_NOT_SUPPORTED')) {
+          throw new AppError(409, 'This Sandbox seller cannot accept USD. Check its receiving settings, or use a US Business Sandbox seller and its app credentials.');
+        }
+        if (issues.has('INSTRUMENT_DECLINED')) throw new AppError(409, 'The Sandbox buyer payment method was declined. Return to PayPal to choose another test method, or start a fresh review.');
+        if (issues.has('ORDER_NOT_APPROVED')) throw new AppError(409, 'Complete buyer approval in PayPal Sandbox first.');
+        if (error.statusCode === 429) throw new AppError(503, 'PayPal Sandbox is limiting requests. Wait before retrying the same checkout.');
+      }
+      throw error;
+    }
   }
 
   return {
@@ -62,63 +70,50 @@ export function paypalClient({ clientId, clientSecret, origin, request = fetch }
       callback.searchParams.set('checkout', 'approved');
       const returnUrl = callback.toString();
       callback.searchParams.set('checkout', 'cancelled');
-      const order = await orderRequest(orderPath, {
-        requestId: payment.createId,
-        payload: {
-          intent: 'CAPTURE',
-          purchase_units: [{
-            reference_id: 'approved-scope',
-            custom_id: review.id,
+      const order = await call('createOrder', {
+        paypalRequestId: payment.createId, prefer: 'return=representation',
+        body: {
+          intent: CheckoutPaymentIntent.Capture,
+          purchaseUnits: [{
+            referenceId: 'approved-scope', customId: review.id,
             description: `MilestoneMatch | ${payment.approved.length} approved line(s)`,
-            amount: { currency_code: 'USD', value: dollars(payment.amount) },
+            amount: { currencyCode: 'USD', value: dollars(payment.amount) },
           }],
-          payment_source: {
-            paypal: {
-              experience_context: {
-                shipping_preference: 'NO_SHIPPING',
-                user_action: 'CONTINUE',
-                return_url: returnUrl,
-                cancel_url: callback.toString(),
-              },
-            },
-          },
+          paymentSource: { paypal: { experienceContext: {
+            shippingPreference: PaypalWalletContextShippingPreference.NoShipping,
+            userAction: PaypalExperienceUserAction.Continue,
+            returnUrl, cancelUrl: callback.toString(),
+          } } },
         },
       });
       const action = order.links?.find(({ rel }) => rel === 'payer-action' || rel === 'approve');
-      const redirect = action && new URL(action.href);
-      if (!order.id || redirect?.protocol !== 'https:' || !['www.sandbox.paypal.com', 'sandbox.paypal.com'].includes(redirect.hostname)) {
+      let redirect;
+      try { if (action) redirect = new URL(action.href); } catch { /* Missing or malformed provider link. */ }
+      if (!order.id || !['https://www.sandbox.paypal.com', 'https://sandbox.paypal.com'].includes(redirect?.origin) || redirect.username || redirect.password) {
         throw new AppError(502, 'PayPal Sandbox did not provide a checkout link. Start a fresh review if the order has expired.');
       }
       return { orderId: order.id, checkoutUrl: redirect.toString() };
     },
     async capture(review, payment) {
-      const path = orderPath + '/' + encodeURIComponent(payment.orderId);
       let order;
       try {
         order = payment.receipt
-          ? await orderRequest(path)
-          : await orderRequest(path + '/capture', { requestId: payment.captureId });
+          ? await call('getOrder', { id: payment.orderId })
+          : await call('captureOrder', { id: payment.orderId, paypalRequestId: payment.captureId, prefer: 'return=representation', body: {} });
       } catch (error) {
-        if (error instanceof PayPalError && error.issues.has('ORDER_ALREADY_CAPTURED')) {
-          order = await orderRequest(path);
-        } else if (error instanceof PayPalError && error.issues.has('ORDER_NOT_APPROVED')) {
-          throw new AppError(409, 'Complete buyer approval in PayPal Sandbox first.');
-        } else {
-          throw error;
-        }
+        if (error instanceof ApiError && issuesFrom(error).has('ORDER_ALREADY_CAPTURED')) {
+          order = await call('getOrder', { id: payment.orderId });
+        } else throw error;
       }
-      const unit = order.purchase_units?.[0];
-      const capture = unit?.payments?.captures?.[0];
-      if (order.id !== payment.orderId || unit?.custom_id !== review.id || !capture?.id ||
-          capture.amount?.currency_code !== 'USD' || capture.amount?.value !== dollars(payment.amount)) {
+      const unit = order.purchaseUnits?.[0];
+      const captures = unit?.payments?.captures;
+      const capture = captures?.[0];
+      if (order.id !== payment.orderId || order.purchaseUnits?.length !== 1 || captures?.length !== 1 ||
+          unit?.customId !== review.id || !capture?.id ||
+          capture.amount?.currencyCode !== 'USD' || capture.amount?.value !== dollars(payment.amount)) {
         throw new AppError(502, 'The PayPal receipt did not match this review. Check the order in Sandbox before retrying.');
       }
-      return {
-        captureId: capture.id,
-        status: capture.status,
-        amount: capture.amount.value,
-        currency: capture.amount.currency_code,
-      };
+      return { captureId: capture.id, status: capture.status, amount: capture.amount.value, currency: capture.amount.currencyCode };
     },
   };
 }

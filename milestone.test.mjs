@@ -153,24 +153,25 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
     origin,
     request: async (url, options) => {
       calls.push(url);
+      const headers = new Headers(options.headers);
       assert.equal(new URL(url).origin, 'https://api-m.sandbox.paypal.com');
       const json = (data, status = 200) => Response.json(data, { status });
       if (url.endsWith('/v1/oauth2/token')) {
         assert.equal(options.body, 'grant_type=client_credentials');
-        assert.match(options.headers.Authorization, /^Basic /);
-        return json({ access_token: 'fixture', expires_in: 3600 });
+        assert.match(headers.get('authorization'), /^Basic /);
+        return json({ access_token: 'fixture', token_type: 'Bearer', expires_in: 3600 });
       }
-      assert.equal(options.headers.Authorization, 'Bearer fixture');
+      assert.equal(headers.get('authorization'), 'Bearer fixture');
       if (url.endsWith('/orders')) {
         createCalls++;
         orderPayload = JSON.parse(options.body);
-        assert.match(options.headers['PayPal-Request-Id'], /^[a-f0-9-]{36}$/);
+        assert.match(headers.get('paypal-request-id'), /^[a-f0-9-]{36}$/);
         return json({ id: 'TEST-ORDER', links: [{ rel: 'payer-action', href: 'https://www.sandbox.paypal.com/checkoutnow?token=TEST-ORDER' }] });
       }
       assert.match(url, /\/TEST-ORDER\/capture$/);
       captureCalls++;
-      captureRequestId ??= options.headers['PayPal-Request-Id'];
-      assert.equal(options.headers['PayPal-Request-Id'], captureRequestId);
+      captureRequestId ??= headers.get('paypal-request-id');
+      assert.equal(headers.get('paypal-request-id'), captureRequestId);
       if (!orderApproved) return json({ details: [{ issue: 'ORDER_NOT_APPROVED' }] }, 422);
       return json({
         id: 'TEST-ORDER',

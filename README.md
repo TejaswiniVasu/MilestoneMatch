@@ -121,7 +121,7 @@ reproducible, **not a digital signature or independent proof of delivery**.
 | --- | --- |
 | Local machine learning | Supervised, example-based text classification. The model learns feature weights from 48 labeled synthetic phrases across 12 web-project deliverable categories. Whole words and character trigrams help it recognize phrasing changes. It abstains on weak or ambiguous matches. |
 | Evidence rules | Show the original update text beside each scope line. Detect common pending and negation phrases and flag shared categories that cannot be uniquely allocated. A person reviews and selects the lines to pay. |
-| PayPal Sandbox | Server-side REST OAuth and Orders v2 create/capture. The server calculates the amount from approved scope lines in integer cents and uses distinct idempotency keys for create and capture. It checks the returned currency, total, and review reference before showing a receipt. |
+| PayPal Sandbox | PayPal Server SDK 2.5 handles OAuth and Orders v2 create/capture/status reads. The server calculates approved amounts in integer cents, uses distinct idempotency keys, and validates receipt currency, amount and review reference. |
 | UI | Browser-based JavaScript, HTML, and CSS. Checkout state stays in the same tab across the approval redirect. The download pairs the resulting receipt with the selection and source evidence. |
 
 ## Validate
@@ -132,6 +132,15 @@ npm run evaluate
 ```
 
 The tests cover 12 held-out synthetic paraphrases, two out-of-domain examples, conflicting reports, the approved/unpaid split, same-origin handling, duplicate order and capture requests, a rejected pre-approval capture, and a receipt amount mismatch. The PayPal request tests use an injected HTTP fixture. Follow the Sandbox steps above to validate the external service.
+
+The PayPal adapter now uses the APIMatic-generated `@paypal/paypal-server-sdk`
+at pinned version 2.5.0. Credentials still use the same `.env` names; no new
+account is required. SDK fixtures exercise actual OAuth, serialization and response
+parsing. Additional cases cover failed-token recovery, seller currency errors,
+declines, rate limiting, already-captured recovery and pending status checks.
+Automatic SDK retries and request/response logging are disabled. See
+[APIMATIC.md](APIMATIC.md) for the sponsor Context Plugin source and actual usage.
+Repeat the real Sandbox checkout after updating this payment integration.
 
 The evaluation runs 23 synthetic regression cases: negation, partial quantities,
 required devices/screenshots, conflicting claims, payment instructions, and
@@ -153,7 +162,9 @@ Re-run Sandbox checkout on the deployed origin before sharing the demo.
 This is a synthetic-data Sandbox demo without production accounts or durable
 storage. Reviews expire after eight hours or any restart; use one instance.
 A sleeping/free host can lose an in-flight review. Do not use real client data.
-Render Workflows, APIMatic tooling and Channel3 are not implemented.
+Render Workflows and Channel3 are not implemented. The APIMatic Context Plugin
+was consulted during SDK integration; it is development context, not a runtime
+agent service or an editor-wide installation.
 See [AWARDS.md](AWARDS.md) for readiness and the account checklist.
 
 This prototype targets English-language updates for small web projects. A category match is a reported claim and may miss task-specific details. Use a line per deliverable and verify the underlying artifacts yourself. Reviews live in server memory for up to eight hours. Each review has one checkout selection. The app is designed for local sandbox testing with USD test payments.

@@ -20,7 +20,7 @@ order/capture events.
 
 **Built with**  
 Node.js, vanilla JavaScript, HTML, CSS, an in-process supervised text classifier,
-PayPal REST OAuth plus Orders v2 in Sandbox, AG Studio 3.1, and Bryntum Scheduler
+PayPal Server SDK 2.5 (APIMatic-generated) with Orders v2 in Sandbox, AG Studio 3.1, and Bryntum Scheduler
 7.3.8 (local trial), with esbuild-generated browser bundles.
 
 **How AG Studio is used**
@@ -43,6 +43,13 @@ The model maps differently worded scope and update lines into supported delivera
 
 **How PayPal is used**  
 The server creates an order tied to the review and its approved total, redirects to PayPal Sandbox for buyer approval, and captures the test payment after the buyer returns. The resulting PayPal order and capture IDs appear in the payment record.
+
+**How APIMatic context was used**
+The sponsor-linked PayPal Server SDK Context Plugin's TypeScript skills were
+consulted directly while migrating payment code to SDK 2.5.0. They informed client
+configuration, auth recovery, model mapping, error handling and transport-level
+tests. No editor-wide installation or runtime agent service is claimed. The
+source revision and concrete changes are documented in [APIMATIC.md](APIMATIC.md).
 
 ## Demo outline, approximately 2 minutes 40 seconds
 
@@ -76,7 +83,8 @@ The official judging rubric gives equal weight to implementation, design, impact
 - `npm run evaluate` reports 23 synthetic regression cases; do not advertise that
   result as real-world AI accuracy.
 - A SHA-256 source fingerprint is not a digital signature.
-- AG Studio and Bryntum have working local integrations. Other sponsor tools and Studio's
+- AG Studio and Bryntum have working local integrations, and APIMatic context was
+  used for the SDK migration. Channel3, Render Workflows and Studio's
   agent framework remain pending. Do not claim roadmap features as implemented.
   See [AWARDS.md](AWARDS.md) for the exact status and licensing prerequisites.
 - Real user feedback, updated external Sandbox capture, a recorded video and

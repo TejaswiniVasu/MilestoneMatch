@@ -33,7 +33,7 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 | Best Use of PayPal + AI | Model output affects eligible items and server-calculated payment | Broader unseen evaluation and stronger model; demonstrate failures and abstention honestly |
 | Best Use of Agentic Commerce | Bounded proposal helper with mandatory human approval | Model-directed tool loop with policy limits and execution trace; current helper is deterministic, not an autonomous commerce agent |
 | Best Use of AG Grid | Local AG Studio dashboard with a custom summary, filtering, theming and layout editing | Obtain trial for hosting/judging; add and validate meaningful Studio Agent Framework behavior and richer agency data |
-| Best Use of APIMatic | Not used | Install official PayPal Context Plugin, use it for a meaningful integration enhancement, document actual usage |
+| Best Use of APIMatic | Sponsor-linked Context Plugin skills consulted for the PayPal Server SDK 2.5 migration and recovery/error handling; provenance recorded in APIMATIC.md | Repeat real Sandbox checkout; retain evidence and confirm organizer eligibility; no editor-wide plugin installation is claimed |
 | Best Use of Bryntum | Local Scheduler trial with editable planned dates, dependency links and capture-aware read-only items | Obtain appropriate licensing for hosted/judging use; add durable schedules and richer dependency handling; do not claim automatic rescheduling |
 | Best Use of Channel3 | Not integrated | Obtain API key; implement useful agency procurement searches with actual source prices/availability, separate from service payment |
 | Best Use of Render | Hosting configuration prepared; not deployed | Create account, deploy, set fresh credentials privately, add/test meaningful Workflows orchestration for evidence jobs |
@@ -49,8 +49,9 @@ sponsor or adding a dependency is not evidence of a competitive integration.
    settings, never a chat, issue, PR, or public repository.
 4. **Render:** connect GitHub and review plan/billing terms. Configuration alone
    is not proof of deployment or Workflows use.
-5. **APIMatic:** follow the official Context Plugin resource instructions. This
-   is development tooling, separate from the runtime AI feature.
+5. **APIMatic:** the sponsor-linked context was used in development. An optional
+   personal-editor installation follows its guide. See APIMATIC.md for the actual
+   workflow; this is separate from the runtime AI feature.
 
 ## Final acceptance gates
 
