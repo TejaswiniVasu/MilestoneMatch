@@ -15,6 +15,9 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 - AG Studio dashboard with current-review data, a custom query-backed summary,
   filter-linked chart and grid, themed layout, editing/reset and mobile stacking.
   Local evaluation only without a key; no Studio agent integration yet.
+- Bryntum Scheduler local trial: draggable planned dates, scope-order dependency
+  links, live payment states, and captured-item date locking. Dates are temporary;
+  there is no automatic dependency rescheduling or payment execution.
 - Previous Windows version: owner reported a completed USD 240 Sandbox capture.
   Updated version: automated PayPal fixtures; repeat the real Sandbox capture
   after updating before filming it.
@@ -31,7 +34,7 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 | Best Use of Agentic Commerce | Bounded proposal helper with mandatory human approval | Model-directed tool loop with policy limits and execution trace; current helper is deterministic, not an autonomous commerce agent |
 | Best Use of AG Grid | Local AG Studio dashboard with a custom summary, filtering, theming and layout editing | Obtain trial for hosting/judging; add and validate meaningful Studio Agent Framework behavior and richer agency data |
 | Best Use of APIMatic | Not used | Install official PayPal Context Plugin, use it for a meaningful integration enhancement, document actual usage |
-| Best Use of Bryntum | Not integrated | Obtain trial; implement milestone due dates, dependencies and a payment-aware schedule using its components |
+| Best Use of Bryntum | Local Scheduler trial with editable planned dates, dependency links and capture-aware read-only items | Obtain appropriate licensing for hosted/judging use; add durable schedules and richer dependency handling; do not claim automatic rescheduling |
 | Best Use of Channel3 | Not integrated | Obtain API key; implement useful agency procurement searches with actual source prices/availability, separate from service payment |
 | Best Use of Render | Hosting configuration prepared; not deployed | Create account, deploy, set fresh credentials privately, add/test meaningful Workflows orchestration for evidence jobs |
 
@@ -39,8 +42,9 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 
 1. **AG Studio:** local evaluation is allowed without a key. Request the sponsor's
    trial for hosted testing; ensure licensing covers the judging period.
-2. **Bryntum:** obtain trial access and review licensing. Do not copy proprietary
-   distribution files into this MIT repository.
+2. **Bryntum:** the sponsor lists a public npm trial, used for local evaluation.
+   Review licensing and the judging-period requirements before hosted use.
+   Do not commit proprietary distribution files into this MIT repository.
 3. **Channel3:** create a developer account; store the key in private environment
    settings, never a chat, issue, PR, or public repository.
 4. **Render:** connect GitHub and review plan/billing terms. Configuration alone

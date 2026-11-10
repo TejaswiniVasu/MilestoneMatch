@@ -8,6 +8,7 @@ import { approveLines, draftPlan, parseReview } from './review.mjs';
 import { evidenceCases } from './evidence-cases.mjs';
 import { createHash } from 'node:crypto';
 import { analyticsRows } from './public/analytics-data.js';
+import { timelineSnapshot } from './public/timeline-data.js';
 import { buildServer } from './server.mjs';
 
 const origin = 'http://127.0.0.1:3000';
@@ -92,6 +93,32 @@ test('analytics distinguishes selections from confirmed captured payments', () =
   assert.deepEqual(analyticsRows(undefined, []), []);
 });
 
+test('planned dates and links cannot approve or capture milestones', () => {
+  const review = parseReview(sample);
+  const ids = ['line-1', 'line-2'];
+  const planning = timelineSnapshot(review, ids, undefined, '2026-11-10', 2, true);
+  assert.equal(planning.resources[0].payment, 'Selected, not paid');
+  assert.equal(planning.capturedCount, 0);
+  assert.equal(planning.events[1].name, 'Prior milestone unpaid · USD 90.00');
+  assert.equal(planning.dependencies.length, 3);
+  assert.equal(planning.events[0].endDate.getDate(), 12);
+  const pending = timelineSnapshot(review, ids, { status: 'PENDING' }, '2026-11-10');
+  assert.equal(pending.capturedCount, 0);
+  const paid = timelineSnapshot(review, ids, { status: 'COMPLETED' }, '2026-11-10', 2, true);
+  assert.equal(paid.capturedCount, 2);
+  assert.ok(paid.events[0].readOnly);
+  assert.ok(!paid.events[2].readOnly);
+  assert.equal(paid.resources[3].payment, 'Unpaid');
+  assert.equal(approveLines(review, ids).amount, 24000);
+  assert.equal(review.payment, undefined);
+  for (const start of ['2026-02-30', '', 'not a date', '2200-01-01']) {
+    assert.throws(() => timelineSnapshot(review, ids, undefined, start), /valid planned start/);
+  }
+  for (const days of [0, -1, 31, 1.5, NaN]) {
+    assert.throws(() => timelineSnapshot(review, ids, undefined, '2026-11-10', days), /1–30/);
+  }
+});
+
 function request(server, route, data, headers = {}, method = 'POST') {
   return new Promise((resolve, reject) => {
     const incoming = Object.assign(Readable.from([JSON.stringify(data)]), {
@@ -160,6 +187,7 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   assert.ok(!JSON.stringify(config.body).includes('test-secret'));
   const hosted = buildServer({ origin: 'https://demo.example', payments });
   assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.studioEnabled, false);
+  assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.timelineEnabled, false);
   assert.match((await request(server, '/', {}, {}, 'GET')).body, /Evidence ledger/);
   const rejected = await request(server, '/api/reviews', sample, { origin: 'https://unrelated.example' });
   assert.equal(rejected.code, 403);

@@ -92,6 +92,11 @@ summary { cursor: pointer; font-weight: 700; }
 #plan { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
 .analytics-panel { margin-top: 22px; }
 .analytics-controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+.schedule-controls { display: flex; align-items: end; flex-wrap: wrap; gap: 12px; margin: 14px 0; }
+.schedule-controls label { display: grid; gap: 4px; font-size: 12px; font-weight: 700; }
+.schedule-controls .schedule-chain { display: flex; align-items: center; align-self: center; }
+.schedule-controls input[type=number] { max-width: 100px; }
+#milestone-timeline { margin-top: 12px; width: 100%; overflow: hidden; --b-primary: #22543d; }
 #studio-dashboard { height: 860px; width: 100%; margin-top: 12px; }
 .studio-evidence-summary { height: 100%; padding: 15px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-content: center; }
 .studio-evidence-summary div { padding: 12px; background: #eaf3e5; border-radius: 9px; }

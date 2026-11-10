@@ -20,7 +20,8 @@ order/capture events.
 
 **Built with**  
 Node.js, vanilla JavaScript, HTML, CSS, an in-process supervised text classifier,
-PayPal REST OAuth plus Orders v2 in Sandbox, and AG Studio 3.1 with an esbuild-generated browser bundle.
+PayPal REST OAuth plus Orders v2 in Sandbox, AG Studio 3.1, and Bryntum Scheduler
+7.3.8 (local trial), with esbuild-generated browser bundles.
 
 **How AG Studio is used**
 The current review drives a themed analytics dashboard. A custom evidence-summary
@@ -28,6 +29,14 @@ widget queries Studio's engine; a status filter updates it alongside the bar cha
 and decision grid. Selected and captured amounts remain distinct. Reviewers can
 customize and reset the layout. This uses local evaluation mode unless a trial or
 commercial license is configured. Studio's agent framework is not integrated.
+
+**How Bryntum is used**
+Scheduler shows planned dates and payment states for the current review's
+milestones. Users can drag/resize uncaptured items, display scope-order dependency
+links, and see captured milestones become read-only. Dates are illustrative until
+edited and reset on reload/checkout redirects. The planner does not automatically
+reschedule dependent tasks, authorize payment, or change approval decisions. This
+is a local trial integration with the vendor watermark intact.
 
 **How AI is used**  
 The model maps differently worded scope and update lines into supported deliverable categories using learned text feature weights. It can abstain. Rules flag pending language and ambiguous evidence, and the reviewer makes the acceptance decision.
@@ -67,7 +76,7 @@ The official judging rubric gives equal weight to implementation, design, impact
 - `npm run evaluate` reports 23 synthetic regression cases; do not advertise that
   result as real-world AI accuracy.
 - A SHA-256 source fingerprint is not a digital signature.
-- AG Studio has a working local integration. Other sponsor tools and Studio's
+- AG Studio and Bryntum have working local integrations. Other sponsor tools and Studio's
   agent framework remain pending. Do not claim roadmap features as implemented.
   See [AWARDS.md](AWARDS.md) for the exact status and licensing prerequisites.
 - Real user feedback, updated external Sandbox capture, a recorded video and

@@ -13,6 +13,9 @@ const staticPaths = new Map([
   ['/mark.svg', ['mark.svg', 'image/svg+xml']],
   ['/analytics-data.js', ['analytics-data.js', 'text/javascript; charset=utf-8']],
   ['/generated/studio.js', ['generated/studio.js', 'text/javascript; charset=utf-8']],
+  ['/timeline-data.js', ['timeline-data.js', 'text/javascript; charset=utf-8']],
+  ['/generated/timeline.js', ['generated/timeline.js', 'text/javascript; charset=utf-8']],
+  ['/generated/timeline.css', ['generated/timeline.css', 'text/css; charset=utf-8']],
 ]);
 
 async function readBody(request) {
@@ -52,6 +55,11 @@ export function buildServer({ origin, payments, studioLicenseKey = '' }) {
     response.setHeader('Content-Security-Policy', `default-src 'self'; style-src 'self' 'nonce-${nonce}' ${vendorStyleHashes}; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`);
     try {
       const { pathname } = new URL(request.url, origin);
+      if (request.method === 'GET' && /^\/generated\/[\w-]+\.(woff2?|ttf)$/.test(pathname)) {
+        const bytes = await readFile(new URL('./public' + pathname, import.meta.url));
+        const type = pathname.endsWith('.woff2') ? 'font/woff2' : pathname.endsWith('.woff') ? 'font/woff' : 'font/ttf';
+        return response.writeHead(200, { 'Content-Type': type }).end(bytes);
+      }
       if (request.method === 'GET' && staticPaths.has(pathname)) {
         const [file, type] = staticPaths.get(pathname);
         const source = await readFile(new URL('./public/' + file, import.meta.url));
@@ -61,7 +69,7 @@ export function buildServer({ origin, payments, studioLicenseKey = '' }) {
       if (request.method === 'GET' && pathname === '/api/config') {
         const local = ['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname);
         return json(200, { sandboxConfigured: payments.configured, sample, scenarios, studioLicenseKey,
-          studioEnabled: local || Boolean(studioLicenseKey) });
+          studioEnabled: local || Boolean(studioLicenseKey), timelineEnabled: local });
       }
       if (request.method === 'GET' && pathname === '/health') return json(200, { status: 'ok' });
       if (request.method !== 'POST') throw new AppError(404, 'This page does not exist.');

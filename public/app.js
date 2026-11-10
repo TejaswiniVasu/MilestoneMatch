@@ -1,4 +1,5 @@
 import { analyticsRows } from './analytics-data.js';
+import { localDateInput, timelineSnapshot } from './timeline-data.js';
 
 const byId = (id) => document.getElementById(id);
 const form = byId('intake');
@@ -26,6 +27,15 @@ let checkoutPending = false;
 let dashboard;
 let dashboardRows = [];
 let dashboardEditing = false;
+let timeline;
+let timelineLoading = false;
+let timelineStyles;
+let schedule = { start: localDateInput(), days: 2, dependencies: false };
+byId('planned-start').value = schedule.start;
+
+function scheduleSnapshot() {
+  return timelineSnapshot(review, [...selected], receipt, schedule.start, schedule.days, schedule.dependencies);
+}
 
 function showError(id, message = '') {
   const element = byId(id);
@@ -70,6 +80,11 @@ function updateTotals() {
   byId('show-analytics').disabled = !review || config.studioEnabled === false;
   byId('show-analytics').title = config.studioEnabled === false
     ? 'A trial or commercial license is required for hosted analytics.' : 'Analyze the current review';
+  byId('show-timeline').disabled = !review || timelineLoading || config.timelineEnabled === false;
+  byId('show-timeline').title = config.timelineEnabled === false ? 'The Bryntum trial timeline is available only for local evaluation.' : 'Plan milestone dates';
+  if (timeline) timeline.update(scheduleSnapshot());
+  for (const id of ['planned-start', 'planned-days', 'planned-chain']) byId(id).disabled = receipt?.status === 'COMPLETED';
+  byId('apply-schedule').disabled = !timeline || receipt?.status === 'COMPLETED';
 }
 
 function node(tag, className, value) {
@@ -158,6 +173,10 @@ function clearReview() {
   checkoutPending = false;
   dashboardRows = [];
   dashboard?.update([]);
+  timeline?.destroy();
+  timeline = undefined;
+  byId('timeline-panel').hidden = true;
+  byId('show-timeline').disabled = true;
   byId('analytics-panel').hidden = true;
   byId('show-analytics').disabled = true;
   byId('plan').replaceChildren();
@@ -277,6 +296,56 @@ byId('show-analytics').addEventListener('click', async () => {
 });
 
 byId('close-analytics').addEventListener('click', () => { byId('analytics-panel').hidden = true; });
+
+function loadTimelineStyles() {
+  if (!timelineStyles) timelineStyles = new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = '/generated/timeline.css';
+    link.onload = resolve;
+    link.onerror = () => { link.remove(); timelineStyles = undefined; reject(new Error('Styles unavailable')); };
+    document.head.append(link);
+  });
+  return timelineStyles;
+}
+
+byId('show-timeline').addEventListener('click', async () => {
+  if (!review || timelineLoading || config.timelineEnabled === false) return;
+  timelineLoading = true;
+  byId('show-timeline').disabled = true;
+  byId('timeline-panel').hidden = false;
+  byId('timeline-status').textContent = 'Loading milestone timeline…';
+  showError('timeline-error');
+  try {
+    if (!timeline) {
+      const [{ mountTimeline }] = await Promise.all([import('/generated/timeline.js'), loadTimelineStyles()]);
+      if (!review) return;
+      timeline = mountTimeline(byId('milestone-timeline'), scheduleSnapshot(), (message) => { byId('timeline-status').textContent = message; });
+    }
+    byId('timeline-status').textContent = 'Local trial · Planned dates only. Payment status follows the current review and confirmed capture.';
+    byId('apply-schedule').disabled = receipt?.status === 'COMPLETED';
+    byId('fit-timeline').disabled = false;
+    byId('timeline-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    showError('timeline-error', 'The trial timeline could not load. Check the browser console for trial or setup errors. Review and checkout remain available.');
+  } finally {
+    timelineLoading = false;
+    byId('show-timeline').disabled = !review || config.timelineEnabled === false;
+  }
+});
+
+byId('apply-schedule').addEventListener('click', () => {
+  if (!review || !timeline || receipt?.status === 'COMPLETED') return;
+  showError('timeline-error');
+  try {
+    const next = { start: byId('planned-start').value, days: Number(byId('planned-days').value), dependencies: byId('planned-chain').checked };
+    const snapshot = timelineSnapshot(review, [...selected], receipt, next.start, next.days, next.dependencies);
+    timeline.update(snapshot, true);
+    schedule = next;
+    byId('timeline-status').textContent = 'Planning dates applied. These dates reset on reload; no payment selection or capture changed.';
+  } catch (error) { showError('timeline-error', error.message); }
+});
+byId('close-timeline').addEventListener('click', () => { byId('timeline-panel').hidden = true; });
+byId('fit-timeline').addEventListener('click', () => { void timeline?.fit(); });
 byId('edit-dashboard').addEventListener('click', () => {
   if (!dashboard) return;
   dashboardEditing = !dashboardEditing;

@@ -67,6 +67,32 @@ a short list of exact pinned vendor stylesheet hashes covers styles for which
 Studio/Charts do not propagate the nonce. Inline style attributes support the
 library's positioning. No external script CDN is required.
 
+## Bryntum delivery planning
+
+After a review, **Open timeline** loads the public Bryntum Scheduler trial.
+The timeline shows each scope item, its amount, payment state, and planned dates.
+Dates begin as an illustrative schedule, not dates extracted from the agreement.
+Choose a start date and days per milestone, then **Apply planning dates**.
+
+Drag or resize uncaptured milestone bars to adjust the plan. **Fit milestones**
+brings all items into view. Optional scope-order links display dependencies and
+highlight when a preceding milestone remains unpaid. These are visual planning
+links, not automatic rescheduling or enforceable contract/payment restrictions.
+Changing a plan never changes the checkout selection, approves work, creates an
+order, or captures a payment. Captured milestones become read-only. Updating a
+payment selection preserves dragged dates while the page remains open.
+
+Planning dates are temporary: reloads and checkout redirects reset them. They are
+not included in the canonical payment record. This integration is available only
+on loopback origins for local trial evaluation; hosting requires a review of
+Bryntum licensing and replacement with the appropriate licensed package. The
+trial watermark/notices are retained. Vendor bundles, themes and fonts are
+generated from the pinned dependency and are not committed to this MIT repository.
+The core source imports the normal `@bryntum/scheduler` alias so a future licensed
+installation can replace the trial without rewriting the integration.
+
+[Official sponsor trial guidance](https://paypalaihackathon.devpost.com/details/bryntum)
+
 ## Run a real PayPal Sandbox checkout
 
 1. Sign in to the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). In **Apps & Credentials**, select **Sandbox**, then use a sandbox REST app associated with a **business** sandbox account. Create one if needed.
@@ -127,7 +153,7 @@ Re-run Sandbox checkout on the deployed origin before sharing the demo.
 This is a synthetic-data Sandbox demo without production accounts or durable
 storage. Reviews expire after eight hours or any restart; use one instance.
 A sleeping/free host can lose an in-flight review. Do not use real client data.
-Render Workflows, Bryntum, APIMatic tooling and Channel3 are not implemented.
+Render Workflows, APIMatic tooling and Channel3 are not implemented.
 See [AWARDS.md](AWARDS.md) for readiness and the account checklist.
 
 This prototype targets English-language updates for small web projects. A category match is a reported claim and may miss task-specific details. Use a line per deliverable and verify the underlying artifacts yourself. Reviews live in server memory for up to eight hours. Each review has one checkout selection. The app is designed for local sandbox testing with USD test payments.

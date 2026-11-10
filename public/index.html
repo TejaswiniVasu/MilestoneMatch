@@ -15,6 +15,7 @@
     <div class="frame top-inner">
       <a class="brand" href="/"><img src="/mark.svg" width="35" height="35" alt=""> MilestoneMatch</a>
       <button class="text-button" id="show-analytics" type="button" disabled>Open analytics</button>
+      <button class="text-button" id="show-timeline" type="button" disabled>Open timeline</button>
       <span class="sandbox"><span></span> PayPal Sandbox</span>
     </div>
   </header>
@@ -113,6 +114,25 @@
       <p id="analytics-status" class="field-help" role="status"></p>
       <p id="analytics-error" class="error" role="alert" hidden></p>
       <div id="studio-dashboard" aria-label="Milestone payment analytics"></div>
+    </section>
+    <section class="card analytics-panel" id="timeline-panel" aria-labelledby="timeline-title" hidden>
+      <div class="card-heading">
+        <div><p class="eyebrow">05 / DELIVERY & PAYMENT PLANNING</p><h2 id="timeline-title">Plan the next milestone</h2></div>
+        <span class="model-badge">BRYNTUM SCHEDULER · TRIAL</span>
+      </div>
+      <p class="ledger-note">Dates are illustrative until you edit them. Drag or resize a bar to plan delivery; captured milestones are read-only. Links show planning order and highlight an unpaid prior milestone. They do not enforce a contract or authorize payment.</p>
+      <div class="schedule-controls">
+        <label>Planned start <input id="planned-start" type="date"></label>
+        <label>Days per milestone <input id="planned-days" type="number" min="1" max="30" step="1" value="2"></label>
+        <label class="schedule-chain"><input id="planned-chain" type="checkbox"> Link milestones in scope order</label>
+        <button class="text-button" id="apply-schedule" type="button" disabled>Apply planning dates</button>
+        <button class="text-button" id="fit-timeline" type="button" disabled>Fit milestones</button>
+        <button class="text-button" id="close-timeline" type="button">Close timeline</button>
+      </div>
+      <p id="timeline-status" class="field-help" role="status"></p>
+      <p id="timeline-error" class="error" role="alert" hidden></p>
+      <div id="milestone-timeline" aria-label="Planned milestone dates and payment status"></div>
+      <p class="field-help">Planning dates are temporary and reset on reload. They are separate from the payment record. Local trial use only; trial notices remain visible.</p>
     </section>
     <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
   </main>
