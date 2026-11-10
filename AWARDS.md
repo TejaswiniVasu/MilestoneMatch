@@ -12,6 +12,9 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 - Server-side PayPal totals, idempotent create/capture, and receipt validation.
 - Server-built export with original input, source fingerprint, decisions, and events.
 - Five synthetic demo scenarios; 23 synthetic evidence regression cases.
+- AG Studio dashboard with current-review data, a custom query-backed summary,
+  filter-linked chart and grid, themed layout, editing/reset and mobile stacking.
+  Local evaluation only without a key; no Studio agent integration yet.
 - Previous Windows version: owner reported a completed USD 240 Sandbox capture.
   Updated version: automated PayPal fixtures; repeat the real Sandbox capture
   after updating before filming it.
@@ -26,7 +29,7 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 | Best Demo Delivery | Normal, conflicting, ambiguous, quantity, and instruction scenarios | Public video under three minutes, accurate captions, clean checkout recording |
 | Best Use of PayPal + AI | Model output affects eligible items and server-calculated payment | Broader unseen evaluation and stronger model; demonstrate failures and abstention honestly |
 | Best Use of Agentic Commerce | Bounded proposal helper with mandatory human approval | Model-directed tool loop with policy limits and execution trace; current helper is deterministic, not an autonomous commerce agent |
-| Best Use of AG Grid | Not integrated | Obtain AG Studio trial; build an agency payment dashboard with custom evidence widgets, theming/layout and agent queries |
+| Best Use of AG Grid | Local AG Studio dashboard with a custom summary, filtering, theming and layout editing | Obtain trial for hosting/judging; add and validate meaningful Studio Agent Framework behavior and richer agency data |
 | Best Use of APIMatic | Not used | Install official PayPal Context Plugin, use it for a meaningful integration enhancement, document actual usage |
 | Best Use of Bryntum | Not integrated | Obtain trial; implement milestone due dates, dependencies and a payment-aware schedule using its components |
 | Best Use of Channel3 | Not integrated | Obtain API key; implement useful agency procurement searches with actual source prices/availability, separate from service payment |
@@ -34,8 +37,8 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 
 ## Entrant account setup
 
-1. **AG Studio:** request the sponsor's trial. Review licensing and ensure judges
-   can run the integration during the judging period.
+1. **AG Studio:** local evaluation is allowed without a key. Request the sponsor's
+   trial for hosted testing; ensure licensing covers the judging period.
 2. **Bryntum:** obtain trial access and review licensing. Do not copy proprietary
    distribution files into this MIT repository.
 3. **Channel3:** create a developer account; store the key in private environment
@@ -63,6 +66,7 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 - [Rubric and overview](https://paypalaihackathon.devpost.com/)
 - [Rules](https://paypalaihackathon.devpost.com/rules)
 - [AG Studio guidance and trial](https://paypalaihackathon.devpost.com/details/aggrid)
+- [Local evaluation and license installation](https://www.ag-grid.com/studio/javascript/licence-install/)
 - [APIMatic tooling](https://paypalaihackathon.devpost.com/details/apimatic)
 - [Bryntum scheduling award](https://paypalaihackathon.devpost.com/details/bryntum)
 - [Channel3: actual API use required](https://paypalaihackathon.devpost.com/details/channel3)

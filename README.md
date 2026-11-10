@@ -8,10 +8,14 @@ Install **Node.js 22.9 or newer**. Extract this project and open a terminal in t
 
 ```sh
 node --version
+npm ci
 npm start
 ```
 
-Open **http://127.0.0.1:3000**. The server binds to that address. The AI review works immediately without credentials, package installation, or network access.
+Open **http://127.0.0.1:3000**. The server binds to that address. `npm ci` installs
+the pinned dependencies once; `npm start` builds the local analytics bundle before
+starting the app. After installation, the review and dashboard work without
+PayPal credentials or an external AI service.
 
 1. Click **Load example**, then **Match delivery evidence**.
 2. The $300 example has $150 in design work and a $90 staging deployment with matching delivery claims. Mobile testing ($40) has no evidence. The handoff archive ($20) is reported as pending.
@@ -29,6 +33,39 @@ a clarification draft you can copy and send yourself.
 The scenario picker includes conflicting claims, missing acceptance evidence,
 ambiguous allocation, and approval instructions embedded in delivery text.
 All scenarios are synthetic and can be reviewed without credentials.
+
+### AG Studio analytics
+
+After running a review, click **Open analytics**. AG Studio 3.1 displays a custom
+evidence summary, a status filter, a bar chart and a milestone decision grid,
+all backed by the current review. The summary queries Studio's data engine, so
+filtering the status updates it along with the chart and grid. Changes to the
+payment selection and confirmed capture update the data source.
+
+**Selected** is not **captured**: selected amounts remain unpaid until the capture
+is completed. The dashboard's unpaid field means the full amount not yet captured;
+the payment desk's unpaid total means the part outside the current selection.
+
+**Customize layout** enables Studio's edit mode and panels. You can rearrange,
+resize, duplicate and configure widgets. **Reset layout** restores the original
+dashboard. Report settings are saved in this browser tab's session storage;
+the dashboard does not collect a shared portfolio of other users' reviews.
+It has no AI chat or Studio Agent Framework integration yet.
+
+AG Studio is a **commercial dependency**, separate from this project's MIT code.
+[Official licensing guidance](https://www.ag-grid.com/studio/javascript/licence-install/)
+allows local evaluation without a key, with a watermark and console warnings.
+For hosted testing or publication, obtain a trial/commercial license covering
+the application and judging period and configure `AG_STUDIO_LICENSE_KEY` privately.
+Hosted analytics stays disabled until a key is configured. The license is used by
+the browser library as documented; it is not a server-only API secret. This app
+does not suppress licensing warnings or remove watermarks.
+
+The analytics bundle is generated from the npm dependency and is not committed.
+Scripts remain restricted to this origin. Studio style elements receive a nonce;
+a short list of exact pinned vendor stylesheet hashes covers styles for which
+Studio/Charts do not propagate the nonce. Inline style attributes support the
+library's positioning. No external script CDN is required.
 
 ## Run a real PayPal Sandbox checkout
 
@@ -90,7 +127,7 @@ Re-run Sandbox checkout on the deployed origin before sharing the demo.
 This is a synthetic-data Sandbox demo without production accounts or durable
 storage. Reviews expire after eight hours or any restart; use one instance.
 A sleeping/free host can lose an in-flight review. Do not use real client data.
-Render Workflows and other sponsor integrations are not implemented.
+Render Workflows, Bryntum, APIMatic tooling and Channel3 are not implemented.
 See [AWARDS.md](AWARDS.md) for readiness and the account checklist.
 
 This prototype targets English-language updates for small web projects. A category match is a reported claim and may miss task-specific details. Use a line per deliverable and verify the underlying artifacts yourself. Reviews live in server memory for up to eight hours. Each review has one checkout selection. The app is designed for local sandbox testing with USD test payments.

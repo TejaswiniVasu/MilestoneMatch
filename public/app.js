@@ -1,3 +1,5 @@
+import { analyticsRows } from './analytics-data.js';
+
 const byId = (id) => document.getElementById(id);
 const form = byId('intake');
 const reviewButton = byId('review-button');
@@ -21,6 +23,9 @@ let selected = new Set();
 let receipt;
 let plan;
 let checkoutPending = false;
+let dashboard;
+let dashboardRows = [];
+let dashboardEditing = false;
 
 function showError(id, message = '') {
   const element = byId(id);
@@ -60,6 +65,11 @@ function updateTotals() {
   byId('budget').disabled = Boolean(order) || checkoutPending;
   const apply = byId('apply-plan');
   if (apply) apply.disabled = Boolean(order) || checkoutPending || !plan?.proposedIds.length;
+  dashboardRows = analyticsRows(review, [...selected], receipt);
+  dashboard?.update(dashboardRows);
+  byId('show-analytics').disabled = !review || config.studioEnabled === false;
+  byId('show-analytics').title = config.studioEnabled === false
+    ? 'A trial or commercial license is required for hosted analytics.' : 'Analyze the current review';
 }
 
 function node(tag, className, value) {
@@ -146,6 +156,10 @@ function clearReview() {
   receipt = undefined;
   plan = undefined;
   checkoutPending = false;
+  dashboardRows = [];
+  dashboard?.update([]);
+  byId('analytics-panel').hidden = true;
+  byId('show-analytics').disabled = true;
   byId('plan').replaceChildren();
   byId('plan').hidden = true;
   showError('plan-error');
@@ -232,6 +246,50 @@ byId('draft-plan').addEventListener('click', async () => {
 byId('budget').addEventListener('input', () => {
   plan = undefined;
   byId('plan').hidden = true;
+});
+
+byId('show-analytics').addEventListener('click', async () => {
+  if (!review || config.studioEnabled === false) return;
+  byId('show-analytics').disabled = true;
+  byId('analytics-panel').hidden = false;
+  byId('analytics-status').textContent = 'Loading analytics…';
+  showError('analytics-error');
+  try {
+    if (!dashboard) {
+      const { mountDashboard } = await import('/generated/studio.js');
+      if (!review) return;
+      dashboard = mountDashboard(byId('studio-dashboard'), dashboardRows, {
+        licenseKey: config.studioLicenseKey,
+        nonce: document.querySelector('meta[name="studio-style-nonce"]').content,
+        onError: (message) => showError('analytics-error', message),
+      });
+    }
+    byId('edit-dashboard').disabled = false;
+    byId('reset-dashboard').disabled = false;
+    byId('analytics-status').textContent = config.studioLicenseKey
+      ? 'Current review only. Layout changes are saved in this browser tab.'
+      : 'Local evaluation · AG Studio displays its license watermark. Layout changes are saved in this browser tab.';
+    byId('analytics-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    byId('analytics-status').textContent = '';
+    showError('analytics-error', 'Analytics could not load. Run npm install and restart the app, then retry. The payment desk is still available.');
+  } finally { byId('show-analytics').disabled = !review; }
+});
+
+byId('close-analytics').addEventListener('click', () => { byId('analytics-panel').hidden = true; });
+byId('edit-dashboard').addEventListener('click', () => {
+  if (!dashboard) return;
+  dashboardEditing = !dashboardEditing;
+  dashboard.setEditing(dashboardEditing);
+  byId('edit-dashboard').textContent = dashboardEditing ? 'Finish customizing' : 'Customize layout';
+  byId('edit-dashboard').setAttribute('aria-pressed', String(dashboardEditing));
+});
+byId('reset-dashboard').addEventListener('click', () => {
+  if (dashboard) dashboard = dashboard.reset();
+  dashboardEditing = false;
+  byId('edit-dashboard').textContent = 'Customize layout';
+  byId('edit-dashboard').setAttribute('aria-pressed', 'false');
+  showError('analytics-error');
 });
 
 form.addEventListener('submit', async (event) => {

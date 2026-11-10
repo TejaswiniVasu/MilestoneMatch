@@ -3,7 +3,7 @@ services:
     name: milestone-match
     runtime: node
     plan: free
-    buildCommand: npm test && npm run evaluate
+    buildCommand: npm ci --include=dev && npm run build && npm test && npm run evaluate
     startCommand: npm start
     healthCheckPath: /health
     envVars:

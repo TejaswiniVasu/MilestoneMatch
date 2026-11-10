@@ -7,6 +7,7 @@ import { paypalClient } from './paypal.mjs';
 import { approveLines, draftPlan, parseReview } from './review.mjs';
 import { evidenceCases } from './evidence-cases.mjs';
 import { createHash } from 'node:crypto';
+import { analyticsRows } from './public/analytics-data.js';
 import { buildServer } from './server.mjs';
 
 const origin = 'http://127.0.0.1:3000';
@@ -74,6 +75,23 @@ test('bounded proposals never approve blocked items or exceed the budget', () =>
   assert.equal(review.payment, undefined);
 });
 
+test('analytics distinguishes selections from confirmed captured payments', () => {
+  const review = parseReview(sample);
+  const sum = (rows, key) => rows.reduce((total, row) => total + row[key], 0);
+  const selectedIds = ['line-1', 'line-2'];
+  const selected = analyticsRows(review, selectedIds);
+  assert.equal(sum(selected, 'selected'), 240);
+  assert.equal(sum(selected, 'captured'), 0);
+  assert.equal(sum(selected, 'unpaid'), 300);
+  assert.equal(sum(selected, 'blocked'), 60);
+  assert.equal(sum(analyticsRows(review, selectedIds, { status: 'PENDING' }), 'captured'), 0);
+  const captured = analyticsRows(review, selectedIds, { status: 'COMPLETED' });
+  assert.equal(sum(captured, 'captured'), 240);
+  assert.equal(sum(captured, 'unpaid'), 60);
+  assert.equal(sum(analyticsRows(review, ['line-3'], { status: 'COMPLETED' }), 'captured'), 0);
+  assert.deepEqual(analyticsRows(undefined, []), []);
+});
+
 function request(server, route, data, headers = {}, method = 'POST') {
   return new Promise((resolve, reject) => {
     const incoming = Object.assign(Readable.from([JSON.stringify(data)]), {
@@ -137,6 +155,11 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
     },
   });
   const server = buildServer({ origin, payments });
+  const config = await request(server, '/api/config', {}, {}, 'GET');
+  assert.equal(config.body.studioEnabled, true);
+  assert.ok(!JSON.stringify(config.body).includes('test-secret'));
+  const hosted = buildServer({ origin: 'https://demo.example', payments });
+  assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.studioEnabled, false);
   assert.match((await request(server, '/', {}, {}, 'GET')).body, /Evidence ledger/);
   const rejected = await request(server, '/api/reviews', sample, { origin: 'https://unrelated.example' });
   assert.equal(rejected.code, 403);

@@ -1,6 +1,6 @@
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
-import { randomUUID } from 'node:crypto';
+import { randomBytes, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { approveLines, AppError, draftPlan, parseReview } from './review.mjs';
 import { paypalClient } from './paypal.mjs';
@@ -11,6 +11,8 @@ const staticPaths = new Map([
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/mark.svg', ['mark.svg', 'image/svg+xml']],
+  ['/analytics-data.js', ['analytics-data.js', 'text/javascript; charset=utf-8']],
+  ['/generated/studio.js', ['generated/studio.js', 'text/javascript; charset=utf-8']],
 ]);
 
 async function readBody(request) {
@@ -30,7 +32,7 @@ async function readBody(request) {
   }
 }
 
-export function buildServer({ origin, payments }) {
+export function buildServer({ origin, payments, studioLicenseKey = '' }) {
   const reviews = new Map();
   const ttl = 8 * 60 * 60 * 1000;
   return createServer(async (request, response) => {
@@ -38,16 +40,28 @@ export function buildServer({ origin, payments }) {
     response.setHeader('Cache-Control', 'no-store');
     response.setHeader('Referrer-Policy', 'no-referrer');
     response.setHeader('X-Content-Type-Options', 'nosniff');
-    response.setHeader('Content-Security-Policy', "default-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'");
+    const nonce = randomBytes(16).toString('base64');
+    // Pinned Studio/Charts emit a few fixed styles without propagating styleNonce.
+    // Permit only their exact hashes; other style elements still require a nonce.
+    const vendorStyleHashes = [
+      'ydedGqCb79ipYJuuWRyOTMrKbkjYWv8WIjG7SRdnEPU=',
+      'qQh5MACkb9yIcbPdi4lOsJy5dWKd901m0f4cHuMtuF8=',
+      'TLR4GbBojMTnKgNWDid3ScmLNCCuE4NUzxTHyMm7Zc4=',
+      '47DEQpj8HBSa+/TImW+5JCeuQeRkm5NMpJWZG3hSuFU=',
+    ].map((hash) => `'sha256-${hash}'`).join(' ');
+    response.setHeader('Content-Security-Policy', `default-src 'self'; style-src 'self' 'nonce-${nonce}' ${vendorStyleHashes}; style-src-attr 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; frame-ancestors 'none'; form-action 'self'`);
     try {
       const { pathname } = new URL(request.url, origin);
       if (request.method === 'GET' && staticPaths.has(pathname)) {
         const [file, type] = staticPaths.get(pathname);
-        const bytes = await readFile(new URL('./public/' + file, import.meta.url));
+        const source = await readFile(new URL('./public/' + file, import.meta.url));
+        const bytes = file === 'index.html' ? Buffer.from(source.toString().replace('__STYLE_NONCE__', nonce)) : source;
         return response.writeHead(200, { 'Content-Type': type }).end(bytes);
       }
       if (request.method === 'GET' && pathname === '/api/config') {
-        return json(200, { sandboxConfigured: payments.configured, sample, scenarios });
+        const local = ['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname);
+        return json(200, { sandboxConfigured: payments.configured, sample, scenarios, studioLicenseKey,
+          studioEnabled: local || Boolean(studioLicenseKey) });
       }
       if (request.method === 'GET' && pathname === '/health') return json(200, { status: 'ok' });
       if (request.method !== 'POST') throw new AppError(404, 'This page does not exist.');
@@ -141,7 +155,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     clientSecret: process.env.PAYPAL_CLIENT_SECRET,
     origin,
   });
-  buildServer({ origin, payments }).listen(port, host, () => {
+  buildServer({ origin, payments, studioLicenseKey: process.env.AG_STUDIO_LICENSE_KEY }).listen(port, host, () => {
     console.log('MilestoneMatch at ' + origin);
   });
 }

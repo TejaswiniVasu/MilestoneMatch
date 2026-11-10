@@ -4,6 +4,7 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#f8f7f2">
+  <meta name="studio-style-nonce" content="__STYLE_NONCE__">
   <title>MilestoneMatch — Freelance payment review</title>
   <link rel="icon" href="/mark.svg" type="image/svg+xml">
   <link rel="stylesheet" href="/style.css">
@@ -13,6 +14,7 @@
   <header class="topbar">
     <div class="frame top-inner">
       <a class="brand" href="/"><img src="/mark.svg" width="35" height="35" alt=""> MilestoneMatch</a>
+      <button class="text-button" id="show-analytics" type="button" disabled>Open analytics</button>
       <span class="sandbox"><span></span> PayPal Sandbox</span>
     </div>
   </header>
@@ -97,6 +99,21 @@
         </div>
       </section>
     </div>
+    <section class="card analytics-panel" id="analytics-panel" aria-labelledby="analytics-title" hidden>
+      <div class="card-heading">
+        <div><p class="eyebrow">04 / PAYMENT & EVIDENCE ANALYTICS</p><h2 id="analytics-title">See what needs attention</h2></div>
+        <span class="model-badge">AG STUDIO</span>
+      </div>
+      <p class="ledger-note">This dashboard uses your current review. Selected amounts are separate from captured payments. Filter the evidence, inspect the ledger, or customize the layout.</p>
+      <div class="analytics-controls">
+        <button class="text-button" id="edit-dashboard" type="button" aria-pressed="false" disabled>Customize layout</button>
+        <button class="text-button" id="reset-dashboard" type="button" disabled>Reset layout</button>
+        <button class="text-button" id="close-analytics" type="button">Close analytics</button>
+      </div>
+      <p id="analytics-status" class="field-help" role="status"></p>
+      <p id="analytics-error" class="error" role="alert" hidden></p>
+      <div id="studio-dashboard" aria-label="Milestone payment analytics"></div>
+    </section>
     <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
   </main>
 </body>

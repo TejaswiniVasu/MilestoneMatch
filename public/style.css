@@ -90,6 +90,14 @@ summary { cursor: pointer; font-weight: 700; }
 .plan-steps { padding-left: 20px; }
 .plan-steps li { margin: 7px 0; }
 #plan { border-top: 1px solid var(--line); margin-top: 12px; padding-top: 12px; }
+.analytics-panel { margin-top: 22px; }
+.analytics-controls { display: flex; gap: 8px; flex-wrap: wrap; margin: 12px 0; }
+#studio-dashboard { height: 860px; width: 100%; margin-top: 12px; }
+.studio-evidence-summary { height: 100%; padding: 15px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; align-content: center; }
+.studio-evidence-summary div { padding: 12px; background: #eaf3e5; border-radius: 9px; }
+.studio-evidence-summary span { display: block; font-size: 11px; color: #526057; }
+.studio-evidence-summary strong { display: block; font-size: 23px; color: #22543d; }
+.studio-evidence-summary p { grid-column: 1 / -1; font-size: 12px; color: #526057; }
 @media (max-width: 730px) {
   .frame { padding: 0 18px; }
   .intro { grid-template-columns: 1fr; gap: 12px; padding: 24px 0; }
@@ -97,4 +105,9 @@ summary { cursor: pointer; font-weight: 700; }
   .workspace { grid-template-columns: 1fr; gap: 13px; }
   .card { padding: 15px; }
   .empty { min-height: 190px; }
+  .top-inner { flex-wrap: wrap; padding-top: 12px; padding-bottom: 12px; }
+  #studio-dashboard { height: 1200px; }
+  .studio-evidence-summary { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 6px; padding: 8px; }
+  .studio-evidence-summary div { padding: 5px; }
+  .studio-evidence-summary strong { font-size: 16px; }
 }
