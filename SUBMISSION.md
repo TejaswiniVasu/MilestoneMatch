@@ -10,6 +10,14 @@ Paste a priced scope and the delivery notes. A local text model maps the notes t
 
 The demo follows a $300 landing-page milestone. The client approves $240 in design and staging work. Mobile testing and source handoff account for the remaining $60, which stays unpaid in this checkout.
 
+The updated review explains why each item is offered or blocked. A bounded
+assistant drafts a whole-item payment proposal within the client's chosen limit
+and a clarification request for unresolved work. Applying the proposal is a
+separate human action; it does not authorize or capture payment. Conflicting,
+partial, unsupported and ambiguous claims stay blocked. The server-generated
+record includes the original input, decision reasons, source fingerprint and
+order/capture events.
+
 **Built with**  
 Node.js, vanilla JavaScript, HTML, CSS, an in-process supervised text classifier, and PayPal REST OAuth plus Orders v2 in Sandbox.
 
@@ -19,16 +27,17 @@ The model maps differently worded scope and update lines into supported delivera
 **How PayPal is used**  
 The server creates an order tied to the review and its approved total, redirects to PayPal Sandbox for buyer approval, and captures the test payment after the buyer returns. The resulting PayPal order and capture IDs appear in the payment record.
 
-## Demo outline, approximately 2 minutes 20 seconds
+## Demo outline, approximately 2 minutes 40 seconds
 
 | Time | Show | Say |
 | --- | --- | --- |
 | 0:00–0:15 | Open the app with the sample project ready. | “You get a delivery update on a $300 freelance project. Some work is ready, and some is still pending. How much should you pay today?” |
 | 0:15–0:38 | Run the review. Point to the two quoted source lines. | “MilestoneMatch compares the delivery update with the agreed scope. Here’s the text behind each suggested match, so I can check the model’s work.” |
-| 0:38–0:55 | Point to missing mobile evidence and pending archive. Select the first two items. | “I’ll approve the design and staging work. I still need mobile test results, and the archive is promised for next week. The checkout total is $240, with $60 still unpaid.” |
-| 0:55–1:35 | Open actual PayPal Sandbox checkout. Show amount and approve with a test buyer. Return and capture. | “The server builds a PayPal Sandbox order for the approved lines. The buyer sees the same total in PayPal, approves it, and I capture the sandbox payment on return.” |
-| 1:35–1:58 | Show confirmed receipt and downloaded record. | “The payment record connects this capture to the items I accepted and the evidence I reviewed. I can see what the $240 covered later.” |
-| 1:58–2:20 | Show the ledger and final split. | “MilestoneMatch makes a delivery update actionable. The model finds the evidence, the client decides what to accept, and PayPal processes the approved payment.” |
+| 0:38–1:00 | Open a decision reason. Draft the payment proposal, show the clarification draft, then apply after inspecting the evidence. | “The assistant proposes $240 within my limit and asks for evidence on the other $60. I inspect the work and choose what to approve.” |
+| 1:00–1:45 | Open actual PayPal Sandbox checkout. Show amount, approve with a test buyer, return and capture. | “The server creates a PayPal Sandbox order for the selected lines. PayPal shows the same $240, and the app validates the capture against this review.” |
+| 1:45–2:05 | Show confirmed receipt and downloaded record. | “This record connects the capture to my accepted items, original evidence and review events.” |
+| 2:05–2:25 | Load the quantity or conflicting-claim scenario and run the review. | “A reported delivery is not proof of completion. Missing requirements and conflicting claims stay blocked for clarification.” |
+| 2:25–2:40 | Return to a screenshot of the completed flow. | “AI helps review delivery claims, a person makes the acceptance decision, and PayPal handles the approved payment.” |
 
 Record a completed test capture before using this script. Prepare a sandbox buyer session so credentials stay off camera. Use an original voiceover and clean screen capture. Upload the final video publicly to YouTube and confirm it opens while signed out.
 
@@ -42,5 +51,17 @@ Record a completed test capture before using this script. Prepare a sandbox buye
 - [ ] Review the description and the entrant's eligibility and originality attestations. Submit before **Friday, Nov 13, 2026 at 1:30 a.m. IST**.
 
 The official judging rubric gives equal weight to implementation, design, impact, innovation, and presentation. Use the same real scenario in the interface, repository, and video. The most distinctive demonstration is the transition from a quoted delivery claim to a specific paid amount with a matching PayPal receipt.
+
+## Claims and remaining evidence
+
+- The assistant uses the local classifier plus deterministic rules. Do not call
+  it an autonomous commerce agent or claim artifact verification.
+- `npm run evaluate` reports 23 synthetic regression cases; do not advertise that
+  result as real-world AI accuracy.
+- A SHA-256 source fingerprint is not a digital signature.
+- Sponsor tools are not implemented in this update. Do not select sponsor-use
+  awards based on the roadmap alone. See [AWARDS.md](AWARDS.md).
+- Real user feedback, updated external Sandbox capture, a recorded video and
+  final Devpost submission remain outstanding.
 
 [Official rules](https://paypalaihackathon.devpost.com/rules) · [Schedule](https://paypalaihackathon.devpost.com/details/dates)

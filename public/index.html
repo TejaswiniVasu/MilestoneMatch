@@ -47,6 +47,8 @@
           <label for="delivery">Delivery update</label>
           <textarea name="delivery" id="delivery" rows="4" maxlength="4000" aria-describedby="update-help" placeholder="The final design frames are shared in the editable prototype."></textarea>
           <p class="field-help" id="update-help">Paste one delivery claim per line. Use synthetic examples for this demo.</p>
+          <label for="scenario">Try a review scenario</label>
+          <div class="scenario-picker"><select id="scenario" aria-label="Review scenario"></select><button class="text-button" type="button" id="load-scenario">Load scenario</button></div>
           <button class="button primary" id="review-button" type="submit">Match delivery evidence <span aria-hidden="true">→</span></button>
           <p class="error" id="intake-error" role="alert" hidden></p>
         </form>
@@ -69,6 +71,14 @@
         <div id="ledger" hidden>
           <p class="ledger-note">Check the source lines yourself, then select the items you approve. A match only identifies a claim in the update.</p>
           <div id="items"></div>
+          <details class="assistant" open>
+            <summary>Review assistant <span>Propose → inspect → approve</span></summary>
+            <p>Draft a payment proposal within your limit and a clarification request for unfinished work. A proposal does not verify the artifacts or make a payment. You inspect the work and choose what to approve.</p>
+            <label for="budget">Payment proposal limit (USD)</label>
+            <div class="plan-controls"><input id="budget" type="number" min="0.01" step="0.01" inputmode="decimal"><button id="draft-plan" class="text-button" type="button">Draft payment proposal</button></div>
+            <p class="error" id="plan-error" role="alert" hidden></p>
+            <div id="plan" hidden aria-live="polite"></div>
+          </details>
           <div class="summary" aria-live="polite">
             <div><span>Agreed</span><strong id="total">$0.00</strong></div>
             <div class="approved"><span>Approved now</span><strong id="approved">$0.00</strong></div>
@@ -87,7 +97,7 @@
         </div>
       </section>
     </div>
-    <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · One review per checkout</span></footer>
+    <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
   </main>
 </body>
 </html>

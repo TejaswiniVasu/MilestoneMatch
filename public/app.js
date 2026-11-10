@@ -19,6 +19,8 @@ let review;
 let order;
 let selected = new Set();
 let receipt;
+let plan;
+let checkoutPending = false;
 
 function showError(id, message = '') {
   const element = byId(id);
@@ -45,7 +47,7 @@ function updateTotals() {
   const note = byId('payment-note');
   checkoutButton.hidden = Boolean(order?.returned || receipt);
   captureButton.hidden = !order?.returned || Boolean(receipt && receipt.status !== 'PENDING');
-  checkoutButton.disabled = !amount || !config.sandboxConfigured;
+  checkoutButton.disabled = checkoutPending || !amount || !config.sandboxConfigured;
   if (receipt?.status === 'COMPLETED') note.textContent = 'PayPal confirmed the sandbox capture.';
   else if (receipt?.status === 'PENDING') note.textContent = 'PayPal is still processing this capture. Check its status below.';
   else if (receipt) note.textContent = 'Review the capture status in the PayPal Developer Dashboard.';
@@ -54,6 +56,10 @@ function updateTotals() {
   else if (!config.sandboxConfigured) note.textContent = 'AI review is available. See the README to connect PayPal Sandbox.';
   else if (amount) note.textContent = 'PayPal will receive the approved total of ' + money(amount) + '.';
   else note.textContent = 'Select the items you approve to continue.';
+  byId('draft-plan').disabled = Boolean(order) || checkoutPending;
+  byId('budget').disabled = Boolean(order) || checkoutPending;
+  const apply = byId('apply-plan');
+  if (apply) apply.disabled = Boolean(order) || checkoutPending || !plan?.proposedIds.length;
 }
 
 function node(tag, className, value) {
@@ -79,7 +85,7 @@ function render() {
       checkbox.type = 'checkbox';
       checkbox.id = item.id;
       checkbox.checked = selected.has(item.id);
-      checkbox.disabled = Boolean(order);
+      checkbox.disabled = Boolean(order) || checkoutPending;
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) selected.add(item.id);
         else selected.delete(item.id);
@@ -99,7 +105,12 @@ function render() {
         ? 'Try a more specific description.'
         : 'No matching line in the delivery update.';
     detail.append(document.createTextNode(explanation));
-    row.append(heading, detail);
+    const reasoning = node('details', 'reasoning');
+    reasoning.append(node('summary', '', 'Why this decision?'));
+    for (const reason of item.reasons ?? []) reasoning.append(node('p', '', reason));
+    reasoning.append(node('p', 'next-action', item.nextAction));
+    if (item.evidence.length) reasoning.append(node('p', '', 'Source: ' + item.evidence.map(({ id }) => id).join(', ')));
+    row.append(heading, detail, reasoning);
     items.append(row);
   }
 
@@ -133,6 +144,11 @@ function clearReview() {
   review = undefined;
   order = undefined;
   receipt = undefined;
+  plan = undefined;
+  checkoutPending = false;
+  byId('plan').replaceChildren();
+  byId('plan').hidden = true;
+  showError('plan-error');
   selected.clear();
   sessionStorage.removeItem(storageKey);
   if (location.search) history.replaceState(null, '', '/');
@@ -152,6 +168,72 @@ byId('sample').addEventListener('click', async () => {
   fields(sample);
 });
 
+byId('load-scenario').addEventListener('click', () => {
+  const example = config.scenarios?.find(({ id }) => id === byId('scenario').value);
+  if (!example) return;
+  clearReview();
+  showError('intake-error');
+  fields(example);
+});
+
+byId('draft-plan').addEventListener('click', async () => {
+  if (order || checkoutPending) return;
+  const currentReview = review;
+  const button = byId('draft-plan');
+  const budgetValue = byId('budget').value;
+  showError('plan-error');
+  button.disabled = true;
+  plan = undefined;
+  byId('plan').replaceChildren();
+  byId('plan').hidden = true;
+  try {
+    const value = budgetValue;
+    if (!/^\d+(?:\.\d{1,2})?$/.test(value)) throw new Error('Enter a USD limit with at most two decimal places.');
+    const result = await post('/api/reviews/' + currentReview.id + '/plan', { budgetCents: Math.round(Number(value) * 100) });
+    if (review !== currentReview || byId('budget').value !== budgetValue) return;
+    plan = result;
+    const box = byId('plan');
+    box.replaceChildren(node('h3', '', money(plan.amount) + ' proposed · ' + money(plan.unpaid) + ' unpaid'));
+    box.append(node('p', '', plan.policy));
+    const trace = node('ol', 'plan-steps');
+    for (const step of plan.steps) {
+      const item = review.items.find(({ id }) => id === step.itemId);
+      trace.append(node('li', '', (step.action === 'propose' ? 'Propose: ' : 'Withhold: ') + item.description + ' — ' + step.reason));
+    }
+    box.append(trace);
+    const apply = node('button', 'text-button', 'Apply proposal to selection');
+    apply.id = 'apply-plan';
+    apply.type = 'button';
+    apply.addEventListener('click', () => {
+      if (order || checkoutPending || !plan) return;
+      selected = new Set(plan.proposedIds);
+      render();
+    });
+    box.append(apply);
+    if (plan.clarification) {
+      const label = node('label', '', 'Clarification draft · copy and send yourself');
+      label.htmlFor = 'clarification';
+      const draft = node('textarea');
+      draft.id = 'clarification';
+      draft.readOnly = true;
+      draft.rows = 4;
+      draft.value = 'Please share completion evidence for the following scope items:\n' + plan.clarification;
+      box.append(label, draft);
+    }
+    box.hidden = false;
+    updateTotals();
+  } catch (error) {
+    if (review === currentReview) showError('plan-error', error.message);
+  } finally {
+    button.disabled = Boolean(order) || checkoutPending;
+  }
+});
+
+byId('budget').addEventListener('input', () => {
+  plan = undefined;
+  byId('plan').hidden = true;
+});
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   clearReview();
@@ -162,6 +244,7 @@ form.addEventListener('submit', async (event) => {
     const result = await post('/api/reviews', input);
     if (Object.keys(input).some((name) => form.elements[name].value !== input[name])) return;
     review = result;
+    byId('budget').value = (review.total / 100).toFixed(2);
     render();
   } catch (error) {
     showError('intake-error', error.message);
@@ -174,7 +257,8 @@ checkoutButton.addEventListener('click', async () => {
   const currentReview = review;
   const approvedIds = [...selected];
   showError('payment-error');
-  checkoutButton.disabled = true;
+  checkoutPending = true;
+  updateTotals();
   byId('items').querySelectorAll('input').forEach((input) => { input.disabled = true; });
   try {
     const payment = await post('/api/reviews/' + currentReview.id + '/order', { approvedIds });
@@ -187,6 +271,11 @@ checkoutButton.addEventListener('click', async () => {
     order ??= { cancelled: true };
     render();
     showError('payment-error', error.message);
+  } finally {
+    if (review === currentReview) {
+      checkoutPending = false;
+      updateTotals();
+    }
   }
 });
 
@@ -207,31 +296,38 @@ captureButton.addEventListener('click', async () => {
   }
 });
 
-byId('export').addEventListener('click', () => {
+byId('export').addEventListener('click', async () => {
   if (receipt?.status !== 'COMPLETED') return;
-  const record = {
-    project: review.title,
-    reviewId: review.id,
-    currency: 'USD',
-    environment: 'sandbox',
-    orderId: order.orderId,
-    receipt,
-    scope: review.items.map((item) => ({ ...item, approved: selected.has(item.id) })),
-  };
-  const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }));
-  const download = node('a');
-  download.href = url;
-  download.download = 'milestone-match-' + order.orderId + '.json';
-  download.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const currentReview = review;
+  byId('export').disabled = true;
+  try {
+    const record = await post('/api/reviews/' + currentReview.id + '/record', {});
+    if (review !== currentReview) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }));
+    const download = node('a');
+    download.href = url;
+    download.download = 'milestone-match-' + order.orderId + '.json';
+    download.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    if (review === currentReview) showError('payment-error', error.message);
+  } finally { byId('export').disabled = false; }
 });
 
 config = await configReady;
+for (const example of config.scenarios ?? []) {
+  const option = node('option', '', example.label);
+  option.value = example.id;
+  byId('scenario').append(option);
+}
 const query = new URLSearchParams(location.search);
-const saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null');
+let saved;
+try { saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); }
+catch { sessionStorage.removeItem(storageKey); }
 if (saved && (!query.has('checkout') || saved.review.id === query.get('review'))) {
   const approved = query.get('checkout') === 'approved' && query.get('token') === saved.order.orderId;
   review = saved.review;
+  byId('budget').value = (review.total / 100).toFixed(2);
   fields(saved.input);
   selected = new Set(saved.approvedIds);
   order = { ...saved.order, returned: approved || saved.order.returned, cancelled: query.get('checkout') === 'cancelled' };

@@ -2,9 +2,9 @@ import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
-import { approveLines, AppError, parseReview } from './review.mjs';
+import { approveLines, AppError, draftPlan, parseReview } from './review.mjs';
 import { paypalClient } from './paypal.mjs';
-import { sample } from './example.mjs';
+import { sample, scenarios } from './example.mjs';
 
 const staticPaths = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
@@ -47,8 +47,9 @@ export function buildServer({ origin, payments }) {
         return response.writeHead(200, { 'Content-Type': type }).end(bytes);
       }
       if (request.method === 'GET' && pathname === '/api/config') {
-        return json(200, { sandboxConfigured: payments.configured, sample });
+        return json(200, { sandboxConfigured: payments.configured, sample, scenarios });
       }
+      if (request.method === 'GET' && pathname === '/health') return json(200, { status: 'ok' });
       if (request.method !== 'POST') throw new AppError(404, 'This page does not exist.');
       if (request.headers.origin !== origin) throw new AppError(403, 'Open the app at ' + origin + ' and try again.');
       const body = await readBody(request);
@@ -58,15 +59,28 @@ export function buildServer({ origin, payments }) {
           if (review.expiresAt <= Date.now()) reviews.delete(id);
         }
         if (reviews.size >= 200) throw new AppError(429, 'Too many active reviews. Restart the local demo or try later.');
-        const result = { id: randomUUID(), ...parseReview(body) };
-        reviews.set(result.id, { ...result, expiresAt: Date.now() + ttl });
+        const result = { id: randomUUID(), createdAt: new Date().toISOString(), ...parseReview(body) };
+        reviews.set(result.id, { ...result, expiresAt: Date.now() + ttl, events: [
+          { type: 'review.created', at: result.createdAt, modelVersion: result.modelVersion },
+        ] });
         return json(201, result);
       }
 
-      const route = /^\/api\/reviews\/([0-9a-f-]{36})\/(order|capture)$/.exec(pathname);
+      const route = /^\/api\/reviews\/([0-9a-f-]{36})\/(order|capture|plan|record)$/.exec(pathname);
       if (!route) throw new AppError(404, 'This endpoint does not exist.');
       const review = reviews.get(route[1]);
       if (!review || review.expiresAt <= Date.now()) throw new AppError(404, 'This review expired. Run the review again.');
+      if (route[2] === 'plan') return json(200, draftPlan(review, body?.budgetCents));
+      if (route[2] === 'record') {
+        if (review.payment?.receipt?.status !== 'COMPLETED') throw new AppError(409, 'A completed capture is required for a payment record.');
+        const payment = review.payment;
+        return json(200, { version: 2, project: review.title, reviewId: review.id, createdAt: review.createdAt,
+          source: review.source, sourceHash: review.sourceHash, modelVersion: review.modelVersion,
+          currency: 'USD', environment: 'sandbox', orderId: payment.orderId, receipt: payment.receipt,
+          approvedCents: payment.amount, unpaidCents: review.total - payment.amount,
+          scope: review.items.map((item) => ({ ...item, approved: payment.approved.some(({ id }) => id === item.id) })),
+          events: review.events });
+      }
       if (route[2] === 'order') {
         if (!payments.configured) throw new AppError(503, 'Connect PayPal Sandbox using the README setup.');
         const selection = approveLines(review, body?.approvedIds);
@@ -79,6 +93,8 @@ export function buildServer({ origin, payments }) {
         if (!payment.creating) {
           payment.creating = payments.create(review, payment).then((order) => {
             Object.assign(payment, order);
+            review.events.push({ type: 'order.created', at: new Date().toISOString(), orderId: order.orderId,
+              approvedIds: payment.approved.map(({ id }) => id), amount: payment.amount });
             return order;
           }).catch((error) => {
             delete payment.creating;
@@ -95,6 +111,9 @@ export function buildServer({ origin, payments }) {
       if (!payment.capturing && (!payment.receipt || payment.receipt.status === 'PENDING')) {
         payment.capturing = payments.capture(review, payment).then((receipt) => {
           payment.receipt = receipt;
+          if (!review.events.some((event) => event.type === 'capture.' + receipt.status && event.captureId === receipt.captureId)) {
+            review.events.push({ type: 'capture.' + receipt.status, at: new Date().toISOString(), captureId: receipt.captureId });
+          }
           return receipt;
         }).finally(() => {
           delete payment.capturing;
@@ -111,8 +130,12 @@ export function buildServer({ origin, payments }) {
 
 if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) {
   const port = Number(process.env.PORT || 3000);
-  const host = '127.0.0.1';
-  const origin = `http://${host}:${port}`;
+  const host = process.env.HOST || '127.0.0.1';
+  const origin = (process.env.APP_ORIGIN || process.env.RENDER_EXTERNAL_URL || `http://127.0.0.1:${port}`).replace(/\/$/, '');
+  const parsedOrigin = new URL(origin);
+  if (parsedOrigin.origin !== origin || !['http:', 'https:'].includes(parsedOrigin.protocol) || parsedOrigin.username || parsedOrigin.password) {
+    throw new Error('APP_ORIGIN must be an HTTP(S) origin with no path or credentials.');
+  }
   const payments = paypalClient({
     clientId: process.env.PAYPAL_CLIENT_ID,
     clientSecret: process.env.PAYPAL_CLIENT_SECRET,

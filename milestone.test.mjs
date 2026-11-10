@@ -4,7 +4,9 @@ import test from 'node:test';
 import { sample } from './example.mjs';
 import { classify } from './model.mjs';
 import { paypalClient } from './paypal.mjs';
-import { approveLines, parseReview } from './review.mjs';
+import { approveLines, draftPlan, parseReview } from './review.mjs';
+import { evidenceCases } from './evidence-cases.mjs';
+import { createHash } from 'node:crypto';
 import { buildServer } from './server.mjs';
 
 const origin = 'http://127.0.0.1:3000';
@@ -45,6 +47,31 @@ test('contradictory evidence and duplicate deliverable categories require review
   const ambiguous = parseReview({ ...sample, scope: sample.scope + '\n15 | Share another Figma design mockup' });
   assert.equal(ambiguous.items[0].status, 'unclear');
   assert.throws(() => parseReview({ ...sample, scope: '4.999 | Design layout' }), /USD amount/);
+});
+
+test('adversarial evidence and explicit acceptance requirements', () => {
+  for (const [name, scope, delivery, expected] of evidenceCases) {
+    const review = parseReview({ title: name, scope, delivery });
+    assert.equal(review.items[0].status, expected, name);
+    if (expected !== 'candidate') assert.throws(() => approveLines(review, ['line-1']), /reported delivery evidence/, name);
+  }
+});
+
+test('bounded proposals never approve blocked items or exceed the budget', () => {
+  const review = parseReview(sample);
+  for (const budget of [1, 8999, 9000, 14999, 15000, 23999, 24000, 30000]) {
+    const plan = draftPlan(review, budget);
+    assert.ok(plan.amount <= budget);
+    assert.equal(plan.amount + plan.unpaid, review.total);
+    assert.ok(plan.proposedIds.every((id) => ['line-1', 'line-2'].includes(id)));
+    if (plan.proposedIds.length) assert.equal(approveLines(review, plan.proposedIds).amount, plan.amount);
+    assert.equal(plan.steps.length, review.items.length);
+  }
+  assert.deepEqual(draftPlan(review, 10000).proposedIds, ['line-2']);
+  for (const bad of [0, -1, 30001, 1.5, '24000', null, Infinity]) {
+    assert.throws(() => draftPlan(review, bad), /payment limit/);
+  }
+  assert.equal(review.payment, undefined);
 });
 
 function request(server, route, data, headers = {}, method = 'POST') {
@@ -116,6 +143,11 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   const review = await request(server, '/api/reviews', sample);
   assert.equal(review.code, 201);
   const base = '/api/reviews/' + review.body.id;
+  assert.equal((await request(server, base + '/record', {})).code, 409);
+  const plan = await request(server, base + '/plan', { budgetCents: 24000 });
+  assert.equal(plan.code, 200);
+  assert.equal(plan.body.amount, 24000);
+  assert.equal(createCalls, 0);
 
   assert.equal((await request(server, base + '/order', { approvedIds: ['line-3'] })).code, 400);
   const selection = { approvedIds: ['line-1', 'line-2'], amount: '0.01' };
@@ -145,4 +177,11 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   assert.deepEqual((await capture()).body, expected);
   assert.equal(captureCalls, 3);
   assert.equal(calls.filter((url) => url.endsWith('/v1/oauth2/token')).length, 1);
+  const record = await request(server, base + '/record', { approvedCents: 1, approvedIds: ['line-4'] });
+  assert.equal(record.code, 200);
+  assert.equal(record.body.approvedCents, 24000);
+  assert.equal(record.body.unpaidCents, 6000);
+  assert.deepEqual(record.body.scope.filter(({ approved }) => approved).map(({ id }) => id), ['line-1', 'line-2']);
+  assert.equal(record.body.sourceHash, createHash('sha256').update(JSON.stringify(record.body.source)).digest('hex'));
+  assert.deepEqual(record.body.events.map(({ type }) => type), ['review.created', 'order.created', 'capture.COMPLETED']);
 });

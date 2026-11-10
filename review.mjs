@@ -1,4 +1,5 @@
-import { matchEvidence } from './model.mjs';
+import { createHash } from 'node:crypto';
+import { matchEvidence, modelVersion } from './model.mjs';
 
 export class AppError extends Error {
   constructor(status, message) {
@@ -33,7 +34,30 @@ export function parseReview(body) {
   });
   const total = items.reduce((sum, item) => sum + item.cents, 0);
   if (total > 1_000_000) throw new AppError(400, 'Keep the sandbox total at or below $10,000.');
-  return { title: title.trim(), total, items: matchEvidence(items, notes) };
+  const source = { title: title.trim(), scope, delivery };
+  return { title: title.trim(), total, items: matchEvidence(items, notes), source, modelVersion,
+    sourceHash: createHash('sha256').update(JSON.stringify(source)).digest('hex') };
+}
+
+export function draftPlan(review, budgetCents) {
+  if (!Number.isSafeInteger(budgetCents) || budgetCents <= 0 || budgetCents > review.total) {
+    throw new AppError(400, 'Set a payment limit greater than zero and no higher than the agreed total.');
+  }
+  let amount = 0;
+  const proposedIds = [];
+  const steps = review.items.map((item) => {
+    const fits = amount + item.cents <= budgetCents;
+    const proposed = item.status === 'candidate' && fits;
+    if (proposed) { amount += item.cents; proposedIds.push(item.id); }
+    return { itemId: item.id, action: proposed ? 'propose' : 'withhold',
+      reason: item.status !== 'candidate' ? item.reasons.join(' ')
+        : !fits ? 'This whole item exceeds the remaining payment limit.'
+          : 'Matching completion claim; human artifact review and approval are still required.' };
+  });
+  return { budgetCents, amount, unpaid: review.total - amount, proposedIds, steps,
+    policy: 'Scope order, whole items only, within your limit. No payment is made by drafting or applying this proposal.',
+    clarification: review.items.filter((item) => item.status !== 'candidate').map((item) =>
+      `${item.description}: ${item.nextAction}`).join('\n') };
 }
 
 export function approveLines(review, approvedIds) {

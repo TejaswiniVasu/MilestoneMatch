@@ -116,30 +116,70 @@ export function classify(text) {
     return { label, score: closest[0] * 0.75 + closest[1] * 0.25 };
   }).sort((a, b) => b.score - a.score);
   const [best, second] = ranked;
-  return best.score >= 0.16 && best.score - second.score >= 0.045 ? best : null;
+  // Character similarity alone can mistake unrelated phrases (e.g. flowers)
+  // for web work. Require a topical whole word from at most two categories.
+  const bestModel = models.find(({ label }) => label === best.label);
+  const topicalWord = [...input].some((feature) => feature.startsWith('word:') &&
+    bestModel.examples.some(({ features }) => features.has(feature)) &&
+    models.filter(({ examples }) => examples.some(({ features }) => features.has(feature))).length <= 2);
+  return topicalWord && best.score >= 0.16 && best.score - second.score >= 0.045 ? best : null;
 }
 
-const pending = /\b(?:not|never|pending|missing|blocked|outstanding|incomplete|awaiting|waiting|tomorrow|next week|next (?:mon|tues|wednes|thurs|fri|satur|sun)day|will|still need|yet|in progress|working on|to follow|todo|tbd|draft|scheduled|plan(?:ning)? to|partially|haven['’]t|won['’]t|can['’]t|cannot)\b/i;
+export const modelVersion = 'local-evidence-2';
+const pending = /\b(?:no|not|never|without|unable|pending|missing|blocked|outstanding|incomplete|awaiting|waiting|tomorrow|next week|next (?:mon|tues|wednes|thurs|fri|satur|sun)day|will|would|should|could|going to|still need|yet|in progress|working on|to follow|todo|tbd|draft|scheduled|plan(?:ning)? to|partially|haven['’]t|hasn['’]t|didn['’]t|doesn['’]t|isn['’]t|aren['’]t|wasn['’]t|weren['’]t|won['’]t|can['’]t|cannot|almost|except|remaining|half|some of|if|once)\b|\b(?:[1-9]?\d)%|\b\d+\s*(?:of|out of|\/)\s*\d+\b|\b(?:one|two|three|four|five)\s+of\s+(?:two|three|four|five|six)\b/i;
 const reported = /\b(?:attached|delivered|completed|finished|included|ready|live|published|shared|sent|uploaded|passed|verified|available|done|handed over)\b|https?:\/\//i;
+const instruction = /\b(?:ignore|override|disregard|bypass)\b.{0,70}\b(?:instructions?|rules?|checks?|scope|approval)\b|\b(?:approve|pay|release)\b.{0,30}\b(?:everything|all items|full amount|regardless)\b/i;
+const facets = [
+  ['screenshots', /\bscreenshots?\b/i],
+  ['Android', /\bandroid\b/i],
+  ['iPhone', /\biphone\b/i],
+  ['Lighthouse', /\blighthouse\b/i],
+];
+
+function missingRequirements(description, matching) {
+  const claim = matching.filter((line) => line.status === 'reported').map(({ text }) => text).join(' ');
+  const missing = facets.filter(([, pattern]) => pattern.test(description) && !pattern.test(claim)).map(([label]) => label);
+  const numbers = description.match(/\b\d+(?:\.\d+)?\b/g) ?? [];
+  const claimedNumbers = new Set(claim.match(/\b\d+(?:\.\d+)?\b/g) ?? []);
+  for (const number of numbers) if (!claimedNumbers.has(number)) missing.push('quantity or target ' + number);
+  return missing;
+}
 
 export function matchEvidence(scope, notes) {
-  const evidence = notes.map((text) => ({
+  const evidence = notes.map((text, index) => ({
+    id: 'update-' + (index + 1),
     text,
     category: classify(text)?.label,
-    status: pending.test(text) ? 'pending' : reported.test(text) ? 'reported' : 'unclear',
+    status: instruction.test(text) ? 'instruction' : pending.test(text) ? 'pending' : reported.test(text) && !text.includes('?') ? 'reported' : 'unclear',
   }));
   const categories = scope.map(({ description }) => classify(description)?.label);
   return scope.map((item, index) => {
     const category = categories[index];
     if (!category) {
-      return { ...item, status: 'unclassified', evidence: [], category: null };
+      return { ...item, status: 'unclassified', evidence: [], category: null,
+        reasons: ['This deliverable is outside the local model coverage.'],
+        nextAction: 'Describe the deliverable more specifically or review it outside this prototype.' };
     }
     const matching = evidence.filter((line) => line.category === category);
     const reportedCount = matching.filter((line) => line.status === 'reported').length;
     const unique = categories.filter((label) => label === category).length === 1;
     let status = 'missing';
+    const missing = missingRequirements(item.description, matching);
     if (matching.some((line) => line.status === 'pending')) status = 'pending';
     else if (matching.length) status = unique && reportedCount > 0 ? 'candidate' : 'unclear';
-    return { ...item, status, evidence: matching, category };
+    if (matching.some((line) => line.status === 'instruction')) status = 'unclear';
+    if (status === 'candidate' && missing.length) status = 'unclear';
+    const reasons = [];
+    if (!matching.length) reasons.push('No delivery update matches this deliverable category.');
+    if (!unique) reasons.push('Multiple scope items share this category; the update cannot uniquely allocate the work.');
+    if (matching.some((line) => line.status === 'pending')) reasons.push('The update contains unfinished, conditional, or partial-delivery language.');
+    if (matching.some((line) => line.status === 'pending') && reportedCount) reasons.push('Completion and unfinished-work claims conflict; clarification is required.');
+    if (matching.some((line) => line.status === 'instruction')) reasons.push('The update contains approval instructions; delivery text cannot authorize payment.');
+    if (matching.length && !reportedCount) reasons.push('There is no unqualified completion claim for this item.');
+    if (reportedCount && missing.length) reasons.push('The completion claim does not mention required evidence: ' + missing.join(', ') + '.');
+    if (status === 'candidate') reasons.push('A completion claim matches this category. Inspect the underlying work before approving.');
+    return { ...item, status, evidence: matching, category, reasons,
+      nextAction: status === 'candidate' ? 'Inspect the artifacts and decide whether to approve.'
+        : 'Request item-specific completion evidence' + (missing.length ? ' covering ' + missing.join(', ') : '') + '.' };
   });
 }
