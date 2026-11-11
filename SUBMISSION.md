@@ -7,8 +7,9 @@
 The entrant verified the hosted Sandbox checkout and downloaded record on
 November 10, 2026: USD 240.00 captured for design and staging, USD 60 unpaid.
 The free service may take about a minute to wake; start a fresh review after a
-restart. Analytics and timeline integrations require the local setup and their
-documented licensing conditions; do not assume they are available on the host.
+restart. Hosted analytics and Gantt were verified with evaluation licenses;
+Channel3 search and the Render readiness flow were also verified online.
+The project does not use OpenAI or require an OpenAI API key.
 
 **Tagline**  
 Turn a messy freelance delivery update into an evidence-backed partial payment.
@@ -37,8 +38,8 @@ PayPal Server SDK 2.5 (APIMatic-generated) with Orders v2 in Sandbox, AG Studio 
 The current review drives a themed analytics dashboard. A custom evidence-summary
 widget queries Studio's engine; a status filter updates it alongside the bar chart
 and decision grid. Selected and captured amounts remain distinct. Reviewers can
-customize and reset the layout. This uses local evaluation mode unless a trial or
-commercial license is configured. Studio's agent framework is not integrated.
+customize and reset the layout. The hosted dashboard uses a validated evaluation
+license. Studio's agent framework is not integrated.
 
 **How Bryntum is used**
 Gantt shows planned dates and payment states for the current review's
@@ -47,7 +48,7 @@ links, and see captured milestones become read-only. Dates are illustrative unti
 edited and reset on reload/checkout redirects. The planner does not automatically
 reschedule dependent tasks, authorize payment, or change approval decisions. This
 uses an evaluation license via BRYNTUM_LICENSE_KEY for hosted access. Vendor
-trial notices remain intact; hosted key validation still needs confirmation.
+trial notices remain intact. Hosted key validation and task rendering were verified.
 
 **How Channel3 is used**
 A reviewer can research equipment for delivery/testing within a separate per-item
@@ -60,8 +61,9 @@ API results and hosted search were verified; milestone payment totals stayed unc
 A readiness flow checkpoints evidence matching, blocked-work totals and a payment
 proposal. The web app dispatches it once per review with an idempotency key,
 shows run status, and checks the returned report against the current source.
-Normal review remains available without workflow credentials. The function and
-UI have fixture checks; a real deployed workflow run still needs verification.
+Normal review remains available without workflow credentials. A hosted run
+succeeded with four milestones, two blocked items, USD 60 withheld and a USD 240
+proposal; approvals stayed at USD 0.
 See [RENDER.md](RENDER.md). No payment runs inside the workflow.
 
 **How AI is used**  
@@ -77,19 +79,13 @@ configuration, auth recovery, model mapping, error handling and transport-level
 tests. No editor-wide installation or runtime agent service is claimed. The
 source revision and concrete changes are documented in [APIMATIC.md](APIMATIC.md).
 
-## Demo outline, approximately 2 minutes 40 seconds
+## Demo recording
 
-| Time | Show | Say |
-| --- | --- | --- |
-| 0:00–0:15 | Open the app with the sample project ready. | “You get a delivery update on a $300 freelance project. Some work is ready, and some is still pending. How much should you pay today?” |
-| 0:15–0:38 | Run the review. Point to the two quoted source lines. | “MilestoneMatch compares the delivery update with the agreed scope. Here’s the text behind each suggested match, so I can check the model’s work.” |
-| 0:38–1:00 | Open a decision reason. Draft the payment proposal, show the clarification draft, then apply after inspecting the evidence. | “The assistant proposes $240 within my limit and asks for evidence on the other $60. I inspect the work and choose what to approve.” |
-| 1:00–1:45 | Open actual PayPal Sandbox checkout. Show amount, approve with a test buyer, return and capture. | “The server creates a PayPal Sandbox order for the selected lines. PayPal shows the same $240, and the app validates the capture against this review.” |
-| 1:45–2:05 | Show confirmed receipt and downloaded record. | “This record connects the capture to my accepted items, original evidence and review events.” |
-| 2:05–2:25 | Load the quantity or conflicting-claim scenario and run the review. | “A reported delivery is not proof of completion. Missing requirements and conflicting claims stay blocked for clarification.” |
-| 2:25–2:40 | Return to a screenshot of the completed flow. | “AI helps review delivery claims, a person makes the acceptance decision, and PayPal handles the approved payment.” |
-
-Record a completed test capture before using this script. Prepare a sandbox buyer session so credentials stay off camera. Use an original voiceover and clean screen capture. Upload the final video publicly to YouTube and confirm it opens while signed out.
+Use [DEMO.md](DEMO.md) for the current 2:50 recording outline, including the
+hosted PayPal capture, analytics, Gantt, Channel3 and background report. Record
+actual interactions, prepare a Sandbox buyer login off camera, and keep the final
+public YouTube video under three minutes. Do not simulate a payment or label a
+fixture as a live workflow.
 
 ## Check before submitting
 
@@ -111,7 +107,7 @@ The official judging rubric gives equal weight to implementation, design, impact
 - A SHA-256 source fingerprint is not a digital signature.
 - AG Studio and Bryntum have verified hosted evaluation integrations, and APIMatic context was
   used for the SDK migration. Channel3 supply search is verified online. Render Workflows is implemented
-  but awaits a deployed run; Studio's agent framework remains pending. Do not claim roadmap features as implemented.
+  and verified online; Studio's agent framework is not integrated. Do not claim roadmap features as implemented.
   See [AWARDS.md](AWARDS.md) for the exact status and licensing prerequisites.
 - Real user feedback, a recorded video and
   final Devpost submission remain outstanding.

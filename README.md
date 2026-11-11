@@ -205,8 +205,8 @@ This is a synthetic-data Sandbox demo without production accounts or durable
 storage. Reviews expire after eight hours or any restart; use one instance.
 A sleeping/free host can lose an in-flight review. Do not use real client data.
 Render Workflows readiness reporting is implemented with three checkpointed steps;
-its separate workflow deployment, API key and flow slug still need a real hosted
-run. See [RENDER.md](RENDER.md) for setup, usage limits and verification. Channel3 supply search is integrated; its
+a real hosted run succeeded on November 11, 2026, suggesting USD 240 and
+withholding USD 60 while leaving approvals unchanged. See [RENDER.md](RENDER.md) for setup, usage limits and verification. Channel3 supply search is integrated; its
 server API key must be configured separately on each host. The APIMatic Context Plugin
 was consulted during SDK integration; it is development context, not a runtime
 agent service or an editor-wide installation.
@@ -215,3 +215,9 @@ See [AWARDS.md](AWARDS.md) for readiness and the account checklist.
 This prototype targets English-language updates for small web projects. A category match is a reported claim and may miss task-specific details. Use a line per deliverable and verify the underlying artifacts yourself. Reviews live in server memory for up to eight hours. Each review has one checkout selection. The app is designed for local sandbox testing with USD test payments.
 
 References: [PayPal Orders v2](https://developer.paypal.com/api/orders/v2), [buyer approval flow](https://developer.paypal.com/whats-an-order/), and [REST authentication](https://developer.paypal.com/api/rest/authentication/).
+
+## Demo recording and submission
+
+See [DEMO.md](DEMO.md) for the recording outline and [SUBMISSION.md](SUBMISSION.md)
+for the project description and final checklist. This project uses its local
+classifier and rules; it does not require OpenAI or an OpenAI API key.

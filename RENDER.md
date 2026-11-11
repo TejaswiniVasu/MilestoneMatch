@@ -55,9 +55,11 @@ stored in Render's run history: use synthetic data only.
    screenshot of the successful run for submission evidence without credentials.
 
 No Render credentials were provisioned in this development environment. The
-flow's function body and SDK adapter have automated tests, and queued/running/
-succeeded UI transitions were checked with a fixture. A real hosted workflow
-run is still required before claiming deployed Workflows usage.
+hosted web service was configured privately by the entrant. On November 11, 2026,
+a real hosted flow run succeeded with four milestones, two blocked items, USD 60
+withheld and a USD 240 proposal; approvals remained USD 0. The run ID was
+`frn-0b94gdbq35rrat3og00ck0c0g`. The function and SDK adapter also have automated
+tests, and UI transitions were checked with a fixture before deployment.
 
 ## Local checks
 
