@@ -7,7 +7,7 @@
 
 **Review the work. Pay with confidence.**
 
-[Live Sandbox demo](https://milestone-match.onrender.com/) · [Demo recording guide](DEMO.md) · [Submission draft](SUBMISSION.md) · [Deployment guide](RENDER.md)
+[Live Sandbox demo](https://milestone-match.onrender.com/) · [Verification evidence](EVIDENCE.md) · [Demo recording guide](DEMO.md) · [Submission draft](SUBMISSION.md) · [Deployment guide](RENDER.md)
 
 An evidence review and PayPal Sandbox checkout desk for freelance web projects. Paste the agreed scope and a delivery update. A local model links reported work to individual scope items and surfaces missing, pending, or ambiguous evidence. A reviewer selects the items they accept, then checks out for that exact amount.
 

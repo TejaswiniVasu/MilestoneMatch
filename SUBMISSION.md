@@ -92,7 +92,7 @@ fixture as a live workflow.
 - [ ] Run the application from a fresh checkout and complete a real Sandbox purchase using a personal test buyer.
 - [x] Entrant confirmed the hosted receipt and export show USD 240.00 captured for the two approved items; USD 60.00 remains unpaid.
 - [ ] Try the sample with the archive described as finished and check that the review offers it for approval after rerunning the match.
-- [ ] Publish a public GitHub repository with all source and setup instructions. Confirm GitHub recognizes the root MIT license and the public source contains no `.env` or credentials.
+- [x] Public GitHub repository contains the complete project on main, setup instructions, CI, branding and MIT license. Configured credentials and generated vendor bundles are excluded. See [EVIDENCE.md](EVIDENCE.md) for verification artifacts.
 - [ ] Add the repository URL and public YouTube link to the existing Devpost draft.
 - [ ] Review the description and the entrant's eligibility and originality attestations. Submit before **Friday, Nov 13, 2026 at 1:30 a.m. IST**.
 

@@ -1,0 +1,122 @@
+{
+  "version": 2,
+  "project": "Northstar landing page",
+  "reviewId": "e4b1898c-d76f-41ce-a519-1ab506ba1071",
+  "createdAt": "2026-11-10T14:23:06.965Z",
+  "source": {
+    "title": "Northstar landing page",
+    "scope": "150.00 | Deliver high-fidelity design mockups and an editable prototype\n90.00 | Deploy the landing page to a hosted staging preview\n40.00 | Verify responsive layouts on mobile and share screenshots\n20.00 | Deliver editable source files in a handoff archive",
+    "delivery": "The final design frames are shared in the editable prototype.\nThe hosted staging preview is live and the link is included.\nThe source ZIP for the handoff will be shared next Tuesday."
+  },
+  "sourceHash": "f189733f75ec23b91d526532303bcf51401e99b4a0092382d9b7747650ba7fa4",
+  "modelVersion": "local-evidence-2",
+  "currency": "USD",
+  "environment": "sandbox",
+  "orderId": "80T44778FE373273V",
+  "receipt": {
+    "captureId": "3C577276P68181740",
+    "status": "COMPLETED",
+    "amount": "240.00",
+    "currency": "USD"
+  },
+  "approvedCents": 24000,
+  "unpaidCents": 6000,
+  "scope": [
+    {
+      "id": "line-1",
+      "description": "Deliver high-fidelity design mockups and an editable prototype",
+      "cents": 15000,
+      "status": "candidate",
+      "evidence": [
+        {
+          "id": "update-1",
+          "text": "The final design frames are shared in the editable prototype.",
+          "category": "design",
+          "status": "reported"
+        }
+      ],
+      "category": "design",
+      "reasons": [
+        "A completion claim matches this category. Inspect the underlying work before approving."
+      ],
+      "nextAction": "Inspect the artifacts and decide whether to approve.",
+      "approved": true
+    },
+    {
+      "id": "line-2",
+      "description": "Deploy the landing page to a hosted staging preview",
+      "cents": 9000,
+      "status": "candidate",
+      "evidence": [
+        {
+          "id": "update-2",
+          "text": "The hosted staging preview is live and the link is included.",
+          "category": "deployment",
+          "status": "reported"
+        }
+      ],
+      "category": "deployment",
+      "reasons": [
+        "A completion claim matches this category. Inspect the underlying work before approving."
+      ],
+      "nextAction": "Inspect the artifacts and decide whether to approve.",
+      "approved": true
+    },
+    {
+      "id": "line-3",
+      "description": "Verify responsive layouts on mobile and share screenshots",
+      "cents": 4000,
+      "status": "missing",
+      "evidence": [],
+      "category": "mobile",
+      "reasons": [
+        "No delivery update matches this deliverable category."
+      ],
+      "nextAction": "Request item-specific completion evidence covering screenshots.",
+      "approved": false
+    },
+    {
+      "id": "line-4",
+      "description": "Deliver editable source files in a handoff archive",
+      "cents": 2000,
+      "status": "pending",
+      "evidence": [
+        {
+          "id": "update-3",
+          "text": "The source ZIP for the handoff will be shared next Tuesday.",
+          "category": "handoff",
+          "status": "pending"
+        }
+      ],
+      "category": "handoff",
+      "reasons": [
+        "The update contains unfinished, conditional, or partial-delivery language.",
+        "There is no unqualified completion claim for this item."
+      ],
+      "nextAction": "Request item-specific completion evidence.",
+      "approved": false
+    }
+  ],
+  "events": [
+    {
+      "type": "review.created",
+      "at": "2026-11-10T14:23:06.965Z",
+      "modelVersion": "local-evidence-2"
+    },
+    {
+      "type": "order.created",
+      "at": "2026-11-10T14:23:17.720Z",
+      "orderId": "80T44778FE373273V",
+      "approvedIds": [
+        "line-1",
+        "line-2"
+      ],
+      "amount": 24000
+    },
+    {
+      "type": "capture.COMPLETED",
+      "at": "2026-11-10T14:23:39.177Z",
+      "captureId": "3C577276P68181740"
+    }
+  ]
+}
