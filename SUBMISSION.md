@@ -2,7 +2,7 @@
 
 **Live demo:** https://milestone-match.onrender.com/
 
-**Source branch:** https://github.com/TejaswiniVasu/MilestoneMatch/tree/improve-evidence-review
+**Source repository:** https://github.com/TejaswiniVasu/MilestoneMatch
 
 The entrant verified the hosted Sandbox checkout and downloaded record on
 November 10, 2026: USD 240.00 captured for design and staging, USD 60 unpaid.

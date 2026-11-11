@@ -1,16 +1,43 @@
+<img src="public/mark.svg" width="56" height="56" alt="MilestoneMatch logo">
+
 # MilestoneMatch
+
+[![Project checks](https://github.com/TejaswiniVasu/MilestoneMatch/actions/workflows/ci.yml/badge.svg)](https://github.com/TejaswiniVasu/MilestoneMatch/actions/workflows/ci.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-5146d6.svg)](LICENSE)
+
+**Review the work. Pay with confidence.**
+
+[Live Sandbox demo](https://milestone-match.onrender.com/) · [Demo recording guide](DEMO.md) · [Submission draft](SUBMISSION.md) · [Deployment guide](RENDER.md)
 
 An evidence review and PayPal Sandbox checkout desk for freelance web projects. Paste the agreed scope and a delivery update. A local model links reported work to individual scope items and surfaces missing, pending, or ambiguous evidence. A reviewer selects the items they accept, then checks out for that exact amount.
 
+![MilestoneMatch payment workspace](docs/images/workspace.png)
+
+## What works
+
+- Evidence matching with source quotes, conservative rules and human approval.
+- PayPal Server SDK checkout for the approved amount, with a downloadable Sandbox payment record.
+- AG Studio review analytics, Bryntum Gantt planning, and Light/Dark/System themes.
+- Channel3 supply research under a separate budget and a checkpointed Render readiness flow.
+
+The hosted demo uses synthetic examples and test funds. The free service may take
+about a minute to wake; reviews expire after eight hours or a server restart.
+AG Studio and Bryntum are vendor-licensed evaluation components, not covered by
+this repository's MIT license. Their notices are retained. No OpenAI key is required.
+
 ## Try it in two minutes
 
-Install **Node.js 22.9 or newer**. Extract this project and open a terminal in the folder that contains `package.json`.
+Install **Node.js 22.9 or newer**, then clone the repository:
 
 ```sh
+git clone https://github.com/TejaswiniVasu/MilestoneMatch.git
+cd MilestoneMatch
 node --version
 npm ci
 npm start
 ```
+
+On Windows PowerShell, use `npm.cmd` in place of `npm` if script execution is restricted.
 
 Open **http://127.0.0.1:3000**. The server binds to that address. `npm ci` installs
 the pinned dependencies once; `npm start` builds the local analytics bundle before

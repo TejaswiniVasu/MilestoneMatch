@@ -42,8 +42,9 @@ Agent Framework or autonomous commerce; those are not implemented.
 - Watch the full export: legible amounts, audible narration, no credentials,
   correct Sandbox labels and a runtime under three minutes.
 - Upload publicly to YouTube and test access while signed out. Keep a local copy.
-- Add the video, clean hosted URL and public source branch to Devpost. The working
-  code is on `improve-evidence-review`; main may not contain the full demo yet.
+- Add the video, clean hosted URL and public source branch to Devpost. Use the public
+  repository at https://github.com/TejaswiniVasu/MilestoneMatch with its complete
+  default branch.
 - Complete eligibility/originality and third-party licensing fields truthfully.
   The entrant must review and submit the final form.
 
