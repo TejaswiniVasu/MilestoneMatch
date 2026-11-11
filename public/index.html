@@ -3,7 +3,7 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f7f2">
+  <meta name="theme-color" content="#f4f6f8">
   <meta name="studio-style-nonce" content="__STYLE_NONCE__">
   <title>MilestoneMatch — Freelance payment review</title>
   <link rel="icon" href="/mark.svg" type="image/svg+xml">
@@ -11,23 +11,38 @@
   <script type="module" src="/app.js"></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="frame top-inner">
-      <a class="brand" href="/"><img src="/mark.svg" width="35" height="35" alt=""> MilestoneMatch</a>
-      <button class="text-button" id="show-analytics" type="button" disabled>Open analytics</button>
-      <button class="text-button" id="show-timeline" type="button" disabled>Open timeline</button>
-      <span class="sandbox"><span></span> PayPal Sandbox</span>
-    </div>
-  </header>
-  <main class="frame">
+  <a class="skip-link" href="#main-content">Skip to workspace</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <a class="brand" href="/"><img src="/mark.svg" width="32" height="32" alt="">MilestoneMatch</a>
+      <div class="sidebar-caption">CLIENT WORKSPACE</div>
+      <nav class="workspace-nav" aria-label="Project tools">
+        <a class="nav-item nav-current" href="#workspace"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5"/></svg>Payment desk</a>
+        <button class="nav-item" id="show-analytics" type="button" disabled><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V4 M4 20h16 M8 16v-5 M13 16V7 M18 16v-8"/></svg>Open analytics</button>
+        <button class="nav-item" id="show-timeline" type="button" disabled><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v15H4z M4 9h16 M9 3v4 M15 3v4 M8 13h4 M12 17h5"/></svg>Open timeline</button>
+        <div class="sidebar-caption nav-caption">PROJECT OPERATIONS</div>
+        <a class="nav-item" href="#background-panel"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5 M19 12a7 7 0 1 1-2-6"/></svg>Readiness report</a>
+        <a class="nav-item" href="#supplies-panel"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 15l5 5 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0"/></svg>Project supplies</a>
+      </nav>
+      <div class="sidebar-note"><span class="environment-dot"></span><strong>Sandbox workspace</strong><p>Test payments. Real review decisions.</p></div>
+    </aside>
+    <div class="app-content">
+      <header class="topbar">
+        <div class="frame top-inner">
+          <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong>Payment desk</strong></div>
+          <span class="sandbox"><span></span> PayPal Sandbox</span>
+        </div>
+      </header>
+  <main class="frame" id="main-content">
+
     <section class="intro">
       <div>
-        <p class="eyebrow"><span>01</span> &nbsp; THE FREELANCE PAYMENT DESK</p>
-        <h1>Review the work.<br><em>Then pay for it.</em></h1>
+        <p class="eyebrow">EVIDENCE-LED PAYMENTS</p>
+        <h1>Review the work.<br><em>Pay with confidence.</em></h1>
         <p class="lede">Match a delivery update to the agreed scope. Review the evidence, approve individual items, and pay the approved total.</p>
       </div>
-      <div class="intro-side">
-        <p class="eyebrow">FROM UPDATE TO RECEIPT</p>
+      <div class="intro-side" aria-label="Review process">
+        <p class="eyebrow">YOUR REVIEW WORKFLOW</p>
         <ol>
           <li><span>01</span> Add scope and update</li>
           <li><span>02</span> Review AI evidence matches</li>
@@ -35,10 +50,11 @@
         </ol>
       </div>
     </section>
-    <div class="workspace">
+    <div class="desk-heading"><div><span class="environment-dot"></span><strong id="review-context">New project review</strong></div><span id="desk-state" role="status">Ready for your scope</span></div>
+    <div class="workspace" id="workspace">
       <section class="card intake" aria-labelledby="scope-title">
         <div class="card-heading">
-          <div><p class="eyebrow">01 / INPUT</p><h2 id="scope-title">Project details</h2></div>
+          <div><p class="eyebrow">01 · PROJECT BRIEF</p><h2 id="scope-title">Project details</h2></div>
           <button class="text-button" type="button" id="sample">Load example</button>
         </div>
         <form id="intake">
@@ -58,7 +74,7 @@
       </section>
       <section class="card results" aria-labelledby="results-title">
         <div class="card-heading">
-          <div><p class="eyebrow">02 / REVIEW</p><h2 id="results-title">Evidence ledger</h2></div>
+          <div><p class="eyebrow">02 · EVIDENCE REVIEW</p><h2 id="results-title">Evidence ledger</h2></div>
           <span class="model-badge">LOCAL AI</span>
         </div>
         <div id="empty" class="empty">
@@ -157,7 +173,9 @@
       <div id="supply-results" class="supply-results"></div>
       <p class="field-help">US retailer offers in USD. Prices exclude any unspecified shipping and taxes; stock can change. Retailer links may earn affiliate commission and open real merchant sites. This feature does not purchase products or charge PayPal.</p>
     </section>
-    <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
+    <footer><span>MilestoneMatch <span aria-hidden="true">·</span> Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
   </main>
+    </div>
+  </div>
 </body>
 </html>

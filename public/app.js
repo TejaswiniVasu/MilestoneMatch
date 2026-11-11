@@ -60,6 +60,8 @@ async function post(url, payload) {
 
 function updateTotals() {
   const amount = review.items.reduce((total, item) => total + (selected.has(item.id) ? item.cents : 0), 0);
+  byId('review-context').textContent = review.title;
+  byId('desk-state').textContent = receipt?.status === 'COMPLETED' ? 'Sandbox payment captured' : amount ? `${money(amount)} selected for payment` : `${review.items.length} milestones · awaiting your approval`;
   byId('total').textContent = money(review.total);
   byId('approved').textContent = money(amount);
   byId('held').textContent = money(review.total - amount);
@@ -81,6 +83,8 @@ function updateTotals() {
   if (apply) apply.disabled = Boolean(order) || checkoutPending || !plan?.proposedIds.length;
   dashboardRows = analyticsRows(review, [...selected], receipt);
   dashboard?.update(dashboardRows);
+  if (config.workflowsConfigured && byId('background-status').textContent === 'Run a review first.') byId('background-status').textContent = 'Ready to prepare a report for this review.';
+  if (config.channel3Configured && byId('supplies-status').textContent === 'Run a review to connect supply research to your project.') byId('supplies-status').textContent = 'Set a separate supply budget and search for this project.';
   byId('run-background').disabled = !review || !config.workflowsConfigured || backgroundWaiting;
   byId('search-supplies').disabled = !review || !config.channel3Configured || supplySearching;
   byId('show-analytics').disabled = !review || config.studioEnabled === false;
@@ -172,6 +176,8 @@ function saveCheckout() {
 }
 
 function clearReview() {
+  byId('review-context').textContent = 'New project review';
+  byId('desk-state').textContent = 'Ready for your scope';
   backgroundRunId = undefined;
   byId('run-background').disabled = true;
   byId('background-result').replaceChildren();
@@ -383,6 +389,8 @@ form.addEventListener('submit', async (event) => {
   showError('intake-error');
   const input = Object.fromEntries(new FormData(form));
   reviewButton.disabled = true;
+  reviewButton.textContent = 'Matching delivery evidence…';
+  form.setAttribute('aria-busy', 'true');
   try {
     const result = await post('/api/reviews', input);
     if (Object.keys(input).some((name) => form.elements[name].value !== input[name])) return;
@@ -393,6 +401,8 @@ form.addEventListener('submit', async (event) => {
     showError('intake-error', error.message);
   } finally {
     reviewButton.disabled = false;
+    reviewButton.textContent = 'Match delivery evidence →';
+    form.removeAttribute('aria-busy');
   }
 });
 
@@ -501,6 +511,8 @@ byId('supplies-form').addEventListener('submit', async (event) => {
   const current = review;
   const generation = ++supplyGeneration;
   supplySearching = true;
+  byId('search-supplies').textContent = 'Searching suppliers…';
+  byId('supplies-form').setAttribute('aria-busy', 'true');
   byId('search-supplies').disabled = true;
   showError('supplies-error');
   byId('supply-results').replaceChildren();
@@ -531,6 +543,8 @@ byId('supplies-form').addEventListener('submit', async (event) => {
     }
   } finally {
     supplySearching = false;
+    byId('search-supplies').textContent = 'Search project supplies';
+    byId('supplies-form').removeAttribute('aria-busy');
     byId('search-supplies').disabled = !review || !config.channel3Configured;
   }
 });
