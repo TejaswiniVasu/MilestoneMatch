@@ -105,6 +105,31 @@ install the [Bryntum AI Agent skills](https://github.com/bryntum/skills) and
 
 [Official sponsor trial guidance](https://paypalaihackathon.devpost.com/details/bryntum)
 
+## Channel3 project supplies
+
+After running a review, use **Project supplies** to find delivery/testing equipment
+within a separate per-item budget. The server uses `@channel3/sdk` 4.9.0 to search
+US offers in USD, then retrieves each product again before displaying refreshed
+prices, availability and merchant links. Results are not cached. Over-budget,
+out-of-stock, non-USD and unsafe offer links are excluded. Unknown availability
+is labeled explicitly. The UI does not buy products or add their cost to approved
+milestones; retailer links lead to real shops and may be affiliate-tracked.
+
+Set `CHANNEL3_API_KEY` in the local ignored `.env` or Render's Environment, then
+restart/deploy. This key is server-only and never returned by `/api/config`.
+Missing configuration disables only supply search. The demo limits searches to
+30 per hour per running instance, with one search in progress; restarts reset
+that counter. No automatic SDK retries or catalog auto-pagination are enabled.
+Prices exclude unspecified shipping/taxes and may change at the merchant.
+
+The [Channel3 API skill](https://github.com/channel3-ai/skills/tree/main/skills/channel3-api)
+was installed with `npx skills add channel3-ai/skills --skill channel3-api`.
+The ignored local skill files guide server-side auth, SDK search, product refresh
+and affiliate-link handling. Install them again in another development checkout
+for the same guidance. A live API smoke test on November 11, 2026 returned six
+microphone products with refreshed offers within a USD 75 per-item limit; hosted
+search still needs its private Render environment setting and verification.
+
 ## Run a real PayPal Sandbox checkout
 
 1. Sign in to the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). In **Apps & Credentials**, select **Sandbox**, then use a sandbox REST app associated with a **business** sandbox account. Create one if needed.
@@ -179,7 +204,8 @@ Re-run Sandbox checkout on the deployed origin before sharing the demo.
 This is a synthetic-data Sandbox demo without production accounts or durable
 storage. Reviews expire after eight hours or any restart; use one instance.
 A sleeping/free host can lose an in-flight review. Do not use real client data.
-Render Workflows and Channel3 are not implemented. The APIMatic Context Plugin
+Render Workflows is not implemented. Channel3 supply search is integrated; its
+server API key must be configured separately on each host. The APIMatic Context Plugin
 was consulted during SDK integration; it is development context, not a runtime
 agent service or an editor-wide installation.
 See [AWARDS.md](AWARDS.md) for readiness and the account checklist.

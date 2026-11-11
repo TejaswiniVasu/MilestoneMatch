@@ -27,6 +27,8 @@ let checkoutPending = false;
 let dashboard;
 let dashboardRows = [];
 let dashboardEditing = false;
+let supplySearching = false;
+let supplyGeneration = 0;
 let timeline;
 let timelineLoading = false;
 let timelineStyles;
@@ -77,6 +79,7 @@ function updateTotals() {
   if (apply) apply.disabled = Boolean(order) || checkoutPending || !plan?.proposedIds.length;
   dashboardRows = analyticsRows(review, [...selected], receipt);
   dashboard?.update(dashboardRows);
+  byId('search-supplies').disabled = !review || !config.channel3Configured || supplySearching;
   byId('show-analytics').disabled = !review || config.studioEnabled === false;
   byId('show-analytics').title = config.studioEnabled === false
     ? 'A trial or commercial license is required for hosted analytics.' : 'Analyze the current review';
@@ -166,6 +169,11 @@ function saveCheckout() {
 }
 
 function clearReview() {
+  supplyGeneration++;
+  byId('supply-results').replaceChildren();
+  showError('supplies-error');
+  byId('search-supplies').disabled = true;
+  byId('supplies-status').textContent = 'Run a review to connect supply research to your project.';
   review = undefined;
   order = undefined;
   receipt = undefined;
@@ -441,7 +449,48 @@ byId('export').addEventListener('click', async () => {
   } finally { byId('export').disabled = false; }
 });
 
+byId('supplies-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!review || supplySearching || !config.channel3Configured) return;
+  const current = review;
+  const generation = ++supplyGeneration;
+  supplySearching = true;
+  byId('search-supplies').disabled = true;
+  showError('supplies-error');
+  byId('supply-results').replaceChildren();
+  byId('supplies-status').textContent = 'Searching Channel3 and refreshing retailer offers…';
+  try {
+    const result = await post('/api/reviews/' + current.id + '/supplies', {
+      query: byId('supply-query').value, budgetCents: Math.round(Number(byId('supply-budget').value) * 100),
+    });
+    if (review !== current || generation !== supplyGeneration) return;
+    for (const product of result.products) {
+      const card = node('article', 'supply-card');
+      card.append(node('h3', '', product.title));
+      for (const offer of product.offers) {
+        const line = node('p', '', `${money(offer.cents)} · ${offer.availability} · `);
+        const link = node('a', '', `View at ${offer.retailer} ↗`);
+        link.href = offer.url; link.target = '_blank'; link.rel = 'noopener noreferrer sponsored';
+        line.append(link); card.append(line);
+      }
+      byId('supply-results').append(card);
+    }
+    byId('supplies-status').textContent = result.products.length
+      ? `${result.products.length} products within your per-item budget · Channel3 offers checked ${new Date(result.checkedAt).toLocaleTimeString()}. Milestone payments are unchanged.`
+      : 'No refreshed offers within this budget. Try another description or increase the per-item limit.';
+  } catch (error) {
+    if (review === current && generation === supplyGeneration) {
+      showError('supplies-error', error.message);
+      byId('supplies-status').textContent = 'Supply search did not complete. Your review and payment selection are unchanged.';
+    }
+  } finally {
+    supplySearching = false;
+    byId('search-supplies').disabled = !review || !config.channel3Configured;
+  }
+});
+
 config = await configReady;
+if (!config.channel3Configured) byId('supplies-status').textContent = 'Supply search needs a Channel3 connection. Review and PayPal checkout remain available.';
 for (const example of config.scenarios ?? []) {
   const option = node('option', '', example.label);
   option.value = example.id;

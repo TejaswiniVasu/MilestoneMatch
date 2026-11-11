@@ -134,6 +134,21 @@
       <div id="milestone-timeline" aria-label="Planned milestone dates and payment status"></div>
       <p class="field-help">Planning dates are temporary and reset on reload. They are separate from the payment record. Evaluation use only; vendor trial notices remain visible when applicable.</p>
     </section>
+    <section class="card" id="supplies-panel" aria-labelledby="supplies-title">
+      <div class="card-heading"><div><p class="eyebrow">06 / PROJECT SUPPLIES</p><h2 id="supplies-title">Find supplies for the next milestone</h2></div><span class="model-badge">CHANNEL3</span></div>
+      <p class="ledger-note">Find equipment for delivery or testing. Review results against a separate per-item budget; supply prices never change your approved milestone total.</p>
+      <form id="supplies-form">
+        <label for="supply-query">What does this project need?</label>
+        <input id="supply-query" required minlength="3" maxlength="200" placeholder="USB microphone for recording the project demo">
+        <label for="supply-budget">Maximum per item (USD)</label>
+        <input id="supply-budget" type="number" min="1" max="10000" step="0.01" value="75" required>
+        <button class="button primary" id="search-supplies" type="submit" disabled>Search project supplies</button>
+      </form>
+      <p id="supplies-status" class="field-help" role="status">Run a review to connect supply research to your project.</p>
+      <p id="supplies-error" class="error" role="alert" hidden></p>
+      <div id="supply-results" class="supply-results"></div>
+      <p class="field-help">US retailer offers in USD. Prices exclude any unspecified shipping and taxes; stock can change. Retailer links may earn affiliate commission and open real merchant sites. This feature does not purchase products or charge PayPal.</p>
+    </section>
     <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
   </main>
 </body>

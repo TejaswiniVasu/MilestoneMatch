@@ -31,7 +31,7 @@ order/capture events.
 **Built with**  
 Node.js, vanilla JavaScript, HTML, CSS, an in-process supervised text classifier,
 PayPal Server SDK 2.5 (APIMatic-generated) with Orders v2 in Sandbox, AG Studio 3.1, and Bryntum Gantt Enterprise
-8.0.0 (evaluation), with esbuild-generated browser bundles.
+8.0.0 (evaluation), Channel3 SDK 4.9.0, with esbuild-generated browser bundles.
 
 **How AG Studio is used**
 The current review drives a themed analytics dashboard. A custom evidence-summary
@@ -48,6 +48,13 @@ edited and reset on reload/checkout redirects. The planner does not automaticall
 reschedule dependent tasks, authorize payment, or change approval decisions. This
 uses an evaluation license via BRYNTUM_LICENSE_KEY for hosted access. Vendor
 trial notices remain intact; hosted key validation still needs confirmation.
+
+**How Channel3 is used**
+A reviewer can research equipment for delivery/testing within a separate per-item
+budget. Server-side SDK search is followed by fresh product retrieval. Results
+show merchant prices, availability and affiliate retailer links. No retail
+purchase is automated, and supply prices never alter the service payment. Live
+API results were verified in development; hosted configuration must be checked.
 
 **How AI is used**  
 The model maps differently worded scope and update lines into supported deliverable categories using learned text feature weights. It can abstain. Rules flag pending language and ambiguous evidence, and the reviewer makes the acceptance decision.
@@ -94,8 +101,8 @@ The official judging rubric gives equal weight to implementation, design, impact
 - `npm run evaluate` reports 23 synthetic regression cases; do not advertise that
   result as real-world AI accuracy.
 - A SHA-256 source fingerprint is not a digital signature.
-- AG Studio and Bryntum have working local integrations, and APIMatic context was
-  used for the SDK migration. Channel3, Render Workflows and Studio's
+- AG Studio and Bryntum have verified hosted evaluation integrations, and APIMatic context was
+  used for the SDK migration. Channel3 supply search is integrated; Render Workflows and Studio's
   agent framework remain pending. Do not claim roadmap features as implemented.
   See [AWARDS.md](AWARDS.md) for the exact status and licensing prerequisites.
 - Real user feedback, a recorded video and

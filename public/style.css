@@ -116,3 +116,10 @@ summary { cursor: pointer; font-weight: 700; }
   .studio-evidence-summary div { padding: 5px; }
   .studio-evidence-summary strong { font-size: 16px; }
 }
+
+#supplies-panel { margin-top: 24px; }
+#supplies-form { display: grid; gap: 12px; max-width: 620px; }
+.supply-results { display: grid; grid-template-columns: repeat(auto-fit, minmax(min(100%, 280px), 1fr)); gap: 16px; margin-top: 20px; }
+.supply-card { border: 1px solid var(--line, #d9e1d8); border-radius: 12px; padding: 18px; overflow-wrap: anywhere; }
+.supply-card h3 { font-size: 1rem; }
+.supply-card a { color: #225b43; }

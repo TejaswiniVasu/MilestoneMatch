@@ -198,6 +198,8 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   assert.equal(rejected.code, 403);
   const review = await request(server, '/api/reviews', sample);
   assert.equal(review.code, 201);
+  assert.equal((await request(server, '/api/reviews/' + review.body.id + '/supplies', { query: 'USB microphone', budgetCents: 7500 })).code, 503);
+  assert.equal((await request(server, '/api/reviews/' + review.body.id + '/supplies', { query: 'USB microphone', budgetCents: -1 })).code, 400);
   const base = '/api/reviews/' + review.body.id;
   assert.equal((await request(server, base + '/record', {})).code, 409);
   const plan = await request(server, base + '/plan', { budgetCents: 24000 });
@@ -240,4 +242,25 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   assert.deepEqual(record.body.scope.filter(({ approved }) => approved).map(({ id }) => id), ['line-1', 'line-2']);
   assert.equal(record.body.sourceHash, createHash('sha256').update(JSON.stringify(record.body.source)).digest('hex'));
   assert.deepEqual(record.body.events.map(({ type }) => type), ['review.created', 'order.created', 'capture.COMPLETED']);
+});
+
+test('supply research is review-scoped, rate limited and does not change payment approval', async () => {
+  let calls = 0, release;
+  const server = buildServer({ origin, payments: { configured: false }, supplies: {
+    configured: true,
+    async search() { calls++; if (calls === 1) await new Promise(resolve => { release = resolve; }); return { products: [] }; },
+  } });
+  const review = (await request(server, '/api/reviews', sample)).body;
+  const route = '/api/reviews/' + review.id + '/supplies';
+  const input = { query: 'USB microphone', budgetCents: 7500 };
+  assert.equal((await request(server, route, input, { origin: 'https://other.example' })).code, 403);
+  const first = request(server, route, input);
+  while (!release) await new Promise(resolve => setImmediate(resolve));
+  assert.equal((await request(server, route, input)).code, 429);
+  release(); assert.equal((await first).code, 200);
+  for (let i = 1; i < 30; i++) assert.equal((await request(server, route, input)).code, 200);
+  assert.equal((await request(server, route, input)).code, 429);
+  assert.equal(calls, 30);
+  assert.equal((await request(server, '/api/reviews/' + review.id + '/record', {})).code, 409);
+  assert.equal((await request(server, '/api/reviews/' + review.id + '/plan', { budgetCents: 24000 })).code, 200);
 });
