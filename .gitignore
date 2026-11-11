@@ -3,3 +3,9 @@
 !.env.example
 node_modules/
 *.log
+public/generated/
+
+# Locally installed agent skill content (reinstall via skills-lock.json)
+.agents/skills/
+
+generated/

@@ -1,4 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 40 40">
-  <rect width="40" height="40" rx="10" fill="#1f4a38"/>
-  <path d="M10 28V15l6 5 4-8 4 8 6-5v13" fill="none" stroke="#e9f2df" stroke-width="2.3" stroke-linecap="round" stroke-linejoin="round"/>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" fill="none">
+  <defs><linearGradient id="brand" x1="6" y1="3" x2="59" y2="63" gradientUnits="userSpaceOnUse"><stop stop-color="#8272F0"/><stop offset="1" stop-color="#4638B9"/></linearGradient></defs>
+  <rect x="1" y="1" width="62" height="62" rx="18" fill="url(#brand)"/>
+  <rect x="1.5" y="1.5" width="61" height="61" rx="17.5" stroke="#fff" stroke-opacity=".18"/>
+  <path d="M15 44V21h7l10 13 10-13h7v23h-8V34l-9 11-9-11v10h-8Z" fill="#fff"/>
+  <circle cx="49" cy="15" r="10" fill="#A5EFDA" stroke="#6151CF" stroke-width="3"/>
+  <path d="m45 15 2.5 2.5L53 12" stroke="#194C42" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
 </svg>

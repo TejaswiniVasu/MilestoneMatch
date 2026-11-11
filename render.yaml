@@ -1,0 +1,28 @@
+services:
+  - type: web
+    name: milestone-match
+    runtime: node
+    plan: free
+    buildCommand: npm ci --include=dev && npm run typecheck && npm run build && npm test && npm run evaluate
+    # Bundles are produced during the build, outside the 512 MB web runtime.
+    # npm start runs prestart and would unnecessarily rebuild them here.
+    startCommand: node server.mjs
+    healthCheckPath: /health
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
+      - key: HOST
+        value: 0.0.0.0
+      - key: PAYPAL_CLIENT_ID
+        sync: false
+      - key: PAYPAL_CLIENT_SECRET
+        sync: false
+  - type: workflow
+    name: milestone-match-reviews
+    runtime: node
+    region: oregon
+    buildCommand: npm ci --include=dev && npm run typecheck && npm run build:workflow && npm test
+    startCommand: npm run start:workflow
+    envVars:
+      - key: NODE_VERSION
+        value: "22"

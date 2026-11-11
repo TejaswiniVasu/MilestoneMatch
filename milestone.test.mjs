@@ -4,7 +4,11 @@ import test from 'node:test';
 import { sample } from './example.mjs';
 import { classify } from './model.mjs';
 import { paypalClient } from './paypal.mjs';
-import { approveLines, parseReview } from './review.mjs';
+import { approveLines, draftPlan, parseReview } from './review.mjs';
+import { evidenceCases } from './evidence-cases.mjs';
+import { createHash } from 'node:crypto';
+import { analyticsRows } from './public/analytics-data.js';
+import { timelineSnapshot } from './public/timeline-data.js';
 import { buildServer } from './server.mjs';
 
 const origin = 'http://127.0.0.1:3000';
@@ -47,6 +51,74 @@ test('contradictory evidence and duplicate deliverable categories require review
   assert.throws(() => parseReview({ ...sample, scope: '4.999 | Design layout' }), /USD amount/);
 });
 
+test('adversarial evidence and explicit acceptance requirements', () => {
+  for (const [name, scope, delivery, expected] of evidenceCases) {
+    const review = parseReview({ title: name, scope, delivery });
+    assert.equal(review.items[0].status, expected, name);
+    if (expected !== 'candidate') assert.throws(() => approveLines(review, ['line-1']), /reported delivery evidence/, name);
+  }
+});
+
+test('bounded proposals never approve blocked items or exceed the budget', () => {
+  const review = parseReview(sample);
+  for (const budget of [1, 8999, 9000, 14999, 15000, 23999, 24000, 30000]) {
+    const plan = draftPlan(review, budget);
+    assert.ok(plan.amount <= budget);
+    assert.equal(plan.amount + plan.unpaid, review.total);
+    assert.ok(plan.proposedIds.every((id) => ['line-1', 'line-2'].includes(id)));
+    if (plan.proposedIds.length) assert.equal(approveLines(review, plan.proposedIds).amount, plan.amount);
+    assert.equal(plan.steps.length, review.items.length);
+  }
+  assert.deepEqual(draftPlan(review, 10000).proposedIds, ['line-2']);
+  for (const bad of [0, -1, 30001, 1.5, '24000', null, Infinity]) {
+    assert.throws(() => draftPlan(review, bad), /payment limit/);
+  }
+  assert.equal(review.payment, undefined);
+});
+
+test('analytics distinguishes selections from confirmed captured payments', () => {
+  const review = parseReview(sample);
+  const sum = (rows, key) => rows.reduce((total, row) => total + row[key], 0);
+  const selectedIds = ['line-1', 'line-2'];
+  const selected = analyticsRows(review, selectedIds);
+  assert.equal(sum(selected, 'selected'), 240);
+  assert.equal(sum(selected, 'captured'), 0);
+  assert.equal(sum(selected, 'unpaid'), 300);
+  assert.equal(sum(selected, 'blocked'), 60);
+  assert.equal(sum(analyticsRows(review, selectedIds, { status: 'PENDING' }), 'captured'), 0);
+  const captured = analyticsRows(review, selectedIds, { status: 'COMPLETED' });
+  assert.equal(sum(captured, 'captured'), 240);
+  assert.equal(sum(captured, 'unpaid'), 60);
+  assert.equal(sum(analyticsRows(review, ['line-3'], { status: 'COMPLETED' }), 'captured'), 0);
+  assert.deepEqual(analyticsRows(undefined, []), []);
+});
+
+test('planned dates and links cannot approve or capture milestones', () => {
+  const review = parseReview(sample);
+  const ids = ['line-1', 'line-2'];
+  const planning = timelineSnapshot(review, ids, undefined, '2026-11-10', 2, true);
+  assert.equal(planning.resources[0].payment, 'Selected, not paid');
+  assert.equal(planning.capturedCount, 0);
+  assert.equal(planning.events[1].name, 'Prior milestone unpaid · USD 90.00');
+  assert.equal(planning.dependencies.length, 3);
+  assert.equal(planning.events[0].endDate.getDate(), 12);
+  const pending = timelineSnapshot(review, ids, { status: 'PENDING' }, '2026-11-10');
+  assert.equal(pending.capturedCount, 0);
+  const paid = timelineSnapshot(review, ids, { status: 'COMPLETED' }, '2026-11-10', 2, true);
+  assert.equal(paid.capturedCount, 2);
+  assert.ok(paid.events[0].readOnly);
+  assert.ok(!paid.events[2].readOnly);
+  assert.equal(paid.resources[3].payment, 'Unpaid');
+  assert.equal(approveLines(review, ids).amount, 24000);
+  assert.equal(review.payment, undefined);
+  for (const start of ['2026-02-30', '', 'not a date', '2200-01-01']) {
+    assert.throws(() => timelineSnapshot(review, ids, undefined, start), /valid planned start/);
+  }
+  for (const days of [0, -1, 31, 1.5, NaN]) {
+    assert.throws(() => timelineSnapshot(review, ids, undefined, '2026-11-10', days), /1–30/);
+  }
+});
+
 function request(server, route, data, headers = {}, method = 'POST') {
   return new Promise((resolve, reject) => {
     const incoming = Object.assign(Readable.from([JSON.stringify(data)]), {
@@ -81,24 +153,25 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
     origin,
     request: async (url, options) => {
       calls.push(url);
+      const headers = new Headers(options.headers);
       assert.equal(new URL(url).origin, 'https://api-m.sandbox.paypal.com');
       const json = (data, status = 200) => Response.json(data, { status });
       if (url.endsWith('/v1/oauth2/token')) {
         assert.equal(options.body, 'grant_type=client_credentials');
-        assert.match(options.headers.Authorization, /^Basic /);
-        return json({ access_token: 'fixture', expires_in: 3600 });
+        assert.match(headers.get('authorization'), /^Basic /);
+        return json({ access_token: 'fixture', token_type: 'Bearer', expires_in: 3600 });
       }
-      assert.equal(options.headers.Authorization, 'Bearer fixture');
+      assert.equal(headers.get('authorization'), 'Bearer fixture');
       if (url.endsWith('/orders')) {
         createCalls++;
         orderPayload = JSON.parse(options.body);
-        assert.match(options.headers['PayPal-Request-Id'], /^[a-f0-9-]{36}$/);
+        assert.match(headers.get('paypal-request-id'), /^[a-f0-9-]{36}$/);
         return json({ id: 'TEST-ORDER', links: [{ rel: 'payer-action', href: 'https://www.sandbox.paypal.com/checkoutnow?token=TEST-ORDER' }] });
       }
       assert.match(url, /\/TEST-ORDER\/capture$/);
       captureCalls++;
-      captureRequestId ??= options.headers['PayPal-Request-Id'];
-      assert.equal(options.headers['PayPal-Request-Id'], captureRequestId);
+      captureRequestId ??= headers.get('paypal-request-id');
+      assert.equal(headers.get('paypal-request-id'), captureRequestId);
       if (!orderApproved) return json({ details: [{ issue: 'ORDER_NOT_APPROVED' }] }, 422);
       return json({
         id: 'TEST-ORDER',
@@ -110,12 +183,29 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
     },
   });
   const server = buildServer({ origin, payments });
+  const config = await request(server, '/api/config', {}, {}, 'GET');
+  assert.equal(config.body.studioEnabled, true);
+  assert.ok(!JSON.stringify(config.body).includes('test-secret'));
+  const hosted = buildServer({ origin: 'https://demo.example', payments });
+  assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.studioEnabled, false);
+  assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.timelineEnabled, false);
+  const licensed = buildServer({ origin: 'https://demo.example', payments, bryntumLicenseKey: 'fixture-license' });
+  const licensedConfig = (await request(licensed, '/api/config', {}, {}, 'GET')).body;
+  assert.equal(licensedConfig.timelineEnabled, true);
+  assert.equal(licensedConfig.bryntumLicenseKey, 'fixture-license');
   assert.match((await request(server, '/', {}, {}, 'GET')).body, /Evidence ledger/);
   const rejected = await request(server, '/api/reviews', sample, { origin: 'https://unrelated.example' });
   assert.equal(rejected.code, 403);
   const review = await request(server, '/api/reviews', sample);
   assert.equal(review.code, 201);
+  assert.equal((await request(server, '/api/reviews/' + review.body.id + '/supplies', { query: 'USB microphone', budgetCents: 7500 })).code, 503);
+  assert.equal((await request(server, '/api/reviews/' + review.body.id + '/supplies', { query: 'USB microphone', budgetCents: -1 })).code, 400);
   const base = '/api/reviews/' + review.body.id;
+  assert.equal((await request(server, base + '/record', {})).code, 409);
+  const plan = await request(server, base + '/plan', { budgetCents: 24000 });
+  assert.equal(plan.code, 200);
+  assert.equal(plan.body.amount, 24000);
+  assert.equal(createCalls, 0);
 
   assert.equal((await request(server, base + '/order', { approvedIds: ['line-3'] })).code, 400);
   const selection = { approvedIds: ['line-1', 'line-2'], amount: '0.01' };
@@ -145,4 +235,50 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   assert.deepEqual((await capture()).body, expected);
   assert.equal(captureCalls, 3);
   assert.equal(calls.filter((url) => url.endsWith('/v1/oauth2/token')).length, 1);
+  const record = await request(server, base + '/record', { approvedCents: 1, approvedIds: ['line-4'] });
+  assert.equal(record.code, 200);
+  assert.equal(record.body.approvedCents, 24000);
+  assert.equal(record.body.unpaidCents, 6000);
+  assert.deepEqual(record.body.scope.filter(({ approved }) => approved).map(({ id }) => id), ['line-1', 'line-2']);
+  assert.equal(record.body.sourceHash, createHash('sha256').update(JSON.stringify(record.body.source)).digest('hex'));
+  assert.deepEqual(record.body.events.map(({ type }) => type), ['review.created', 'order.created', 'capture.COMPLETED']);
+});
+
+test('supply research is review-scoped, rate limited and does not change payment approval', async () => {
+  let calls = 0, release;
+  const server = buildServer({ origin, payments: { configured: false }, supplies: {
+    configured: true,
+    async search() { calls++; if (calls === 1) await new Promise(resolve => { release = resolve; }); return { products: [] }; },
+  } });
+  const review = (await request(server, '/api/reviews', sample)).body;
+  const route = '/api/reviews/' + review.id + '/supplies';
+  const input = { query: 'USB microphone', budgetCents: 7500 };
+  assert.equal((await request(server, route, input, { origin: 'https://other.example' })).code, 403);
+  const first = request(server, route, input);
+  while (!release) await new Promise(resolve => setImmediate(resolve));
+  assert.equal((await request(server, route, input)).code, 429);
+  release(); assert.equal((await first).code, 200);
+  for (let i = 1; i < 30; i++) assert.equal((await request(server, route, input)).code, 200);
+  assert.equal((await request(server, route, input)).code, 429);
+  assert.equal(calls, 30);
+  assert.equal((await request(server, '/api/reviews/' + review.id + '/record', {})).code, 409);
+  assert.equal((await request(server, '/api/reviews/' + review.id + '/plan', { budgetCents: 24000 })).code, 200);
+});
+
+test('background report starts once, rejects foreign results and cannot create a payment', async () => {
+  let calls = 0;
+  let result = { status: 'succeeded', report: { sourceHash: 'wrong-review' } };
+  const server = buildServer({ origin, payments: { configured: false }, workflows: {
+    configured: true,
+    async start(input) { calls++; assert.deepEqual(input, sample); return 'frn-test123'; },
+    async status() { return result; },
+  } });
+  const review = (await request(server, '/api/reviews', sample)).body;
+  const base = '/api/reviews/' + review.id;
+  assert.equal((await request(server, base + '/report-status', {})).code, 409);
+  const starts = await Promise.all([request(server, base + '/report', {}), request(server, base + '/report', {})]);
+  assert.equal(starts[0].code, 202);
+  assert.equal(calls, 1);
+  assert.equal((await request(server, base + '/report-status', {})).code, 502);
+  assert.equal((await request(server, base + '/record', {})).code, 409);
 });

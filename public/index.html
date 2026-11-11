@@ -3,39 +3,92 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="theme-color" content="#f8f7f2">
+  <meta name="theme-color" content="#f4f6f8">
+  <meta name="studio-style-nonce" content="__STYLE_NONCE__">
   <title>MilestoneMatch — Freelance payment review</title>
   <link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <script src="/theme.js"></script>
   <link rel="stylesheet" href="/style.css">
   <script type="module" src="/app.js"></script>
 </head>
 <body>
-  <header class="topbar">
-    <div class="frame top-inner">
-      <a class="brand" href="/"><img src="/mark.svg" width="35" height="35" alt=""> MilestoneMatch</a>
-      <span class="sandbox"><span></span> PayPal Sandbox</span>
-    </div>
-  </header>
-  <main class="frame">
+  <a class="skip-link" href="#main-content">Skip to workspace</a>
+  <div class="app-shell">
+    <aside class="sidebar" aria-label="Workspace navigation">
+      <a class="brand" href="/" aria-label="MilestoneMatch home"><img src="/mark.svg" width="36" height="36" alt=""><span class="brand-lockup"><strong>MilestoneMatch</strong><small>REVIEW &amp; PAYMENTS</small></span></a>
+      <div class="sidebar-caption">CLIENT WORKSPACE</div>
+      <nav class="workspace-nav" aria-label="Project tools">
+        <a class="nav-item nav-current" href="#workspace"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5"/></svg>Payment desk</a>
+        <button class="nav-item" id="show-analytics" type="button" disabled><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 20V4 M4 20h16 M8 16v-5 M13 16V7 M18 16v-8"/></svg>Open analytics</button>
+        <button class="nav-item" id="show-timeline" type="button" disabled><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 5h16v15H4z M4 9h16 M9 3v4 M15 3v4 M8 13h4 M12 17h5"/></svg>Open timeline</button>
+        <div class="sidebar-caption nav-caption">PROJECT OPERATIONS</div>
+        <a class="nav-item" href="#background-panel"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 7v5h-5 M19 12a7 7 0 1 1-2-6"/></svg>Readiness report</a>
+        <a class="nav-item" href="#supplies-panel"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 15l5 5 M17 10a7 7 0 1 1-14 0 7 7 0 0 1 14 0"/></svg>Project supplies</a>
+      </nav>
+      <div class="sidebar-note"><span class="environment-dot"></span><strong>Sandbox workspace</strong><p>Test payments. Real review decisions.</p></div>
+    </aside>
+    <div class="app-content">
+      <header class="topbar">
+        <div class="frame top-inner">
+          <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong>Payment desk</strong></div>
+          <div class="top-actions">
+            <label class="theme-control" for="theme-mode"><span>Theme</span><select id="theme-mode" aria-label="Color theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system" selected>System</option></select></label>
+            <span class="sandbox"><span></span> PayPal Sandbox</span>
+          </div>
+        </div>
+      </header>
+  <main class="frame" id="main-content">
+
     <section class="intro">
       <div>
-        <p class="eyebrow"><span>01</span> &nbsp; THE FREELANCE PAYMENT DESK</p>
-        <h1>Review the work.<br><em>Then pay for it.</em></h1>
+        <p class="eyebrow">EVIDENCE-LED PAYMENTS</p>
+        <h1>Review the work.<br><em>Pay with confidence.</em></h1>
         <p class="lede">Match a delivery update to the agreed scope. Review the evidence, approve individual items, and pay the approved total.</p>
       </div>
-      <div class="intro-side">
-        <p class="eyebrow">FROM UPDATE TO RECEIPT</p>
+      <div class="intro-side" aria-label="Review process">
+        <div class="workflow-artwork">
+          <span class="art-label">A CLEAR PATH TO PAYMENT</span>
+          <svg class="workflow-art" viewBox="0 0 360 174" fill="none" role="img" aria-labelledby="workflow-art-title">
+            <title id="workflow-art-title">Agreed scope and delivery evidence come together for a human approval decision</title>
+            <defs>
+              <linearGradient id="flow-card" x1="123" y1="24" x2="236" y2="157" gradientUnits="userSpaceOnUse"><stop stop-color="#8B7AF3"/><stop offset="1" stop-color="#5146D6"/></linearGradient>
+            </defs>
+            <path class="art-track" d="M70 87h220" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <circle class="art-orbit" cx="180" cy="87" r="74" stroke-dasharray="2 6"/>
+            <g transform="translate(22 44) rotate(-9 43 44)">
+              <rect class="art-paper-shadow" x="3" y="5" width="86" height="91" rx="12"/>
+              <rect class="art-paper" width="86" height="91" rx="12"/>
+              <rect class="art-soft" x="14" y="14" width="22" height="22" rx="6"/>
+              <path class="art-accent-stroke" d="M21 20h9M21 25h9M21 30h5" stroke-width="1.8" stroke-linecap="round"/>
+              <path class="art-muted-stroke" d="M15 49h55M15 59h43M15 69h49" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <rect x="125" y="31" width="110" height="117" rx="20" fill="url(#flow-card)"/>
+            <rect x="130" y="36" width="100" height="107" rx="16" stroke="white" stroke-opacity=".2"/>
+            <path d="M150 111V67h11l19 24 19-24h11v44h-13V89l-17 21-17-21v22h-13Z" fill="white"/>
+            <g transform="translate(250 44) rotate(9 43 44)">
+              <rect class="art-paper-shadow" x="3" y="5" width="86" height="91" rx="12"/>
+              <rect class="art-paper" width="86" height="91" rx="12"/>
+              <circle cx="29" cy="27" r="13" class="art-check-bg"/>
+              <path d="m23 27 4 4 8-9" class="art-check-stroke" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path class="art-muted-stroke" d="M15 49h55M15 59h43M15 69h49" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <circle cx="232" cy="36" r="15" class="art-check-bg"/>
+            <path d="m225 36 5 5 9-10" class="art-check-stroke" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="art-accent-stroke" d="M102 30v9M98 34h9M260 145v8M256 149h8" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
         <ol>
-          <li><span>01</span> Add scope and update</li>
-          <li><span>02</span> Review AI evidence matches</li>
-          <li><span>03</span> Approve and pay in Sandbox</li>
+          <li><span>01</span> Scope</li>
+          <li><span>02</span> Evidence</li>
+          <li><span>03</span> Your decision</li>
         </ol>
       </div>
     </section>
-    <div class="workspace">
+    <div class="desk-heading"><div><span class="environment-dot"></span><strong id="review-context">New project review</strong></div><span id="desk-state" role="status">Ready for your scope</span></div>
+    <div class="workspace" id="workspace">
       <section class="card intake" aria-labelledby="scope-title">
         <div class="card-heading">
-          <div><p class="eyebrow">01 / INPUT</p><h2 id="scope-title">Project details</h2></div>
+          <div><p class="eyebrow">01 · PROJECT BRIEF</p><h2 id="scope-title">Project details</h2></div>
           <button class="text-button" type="button" id="sample">Load example</button>
         </div>
         <form id="intake">
@@ -47,21 +100,29 @@
           <label for="delivery">Delivery update</label>
           <textarea name="delivery" id="delivery" rows="4" maxlength="4000" aria-describedby="update-help" placeholder="The final design frames are shared in the editable prototype."></textarea>
           <p class="field-help" id="update-help">Paste one delivery claim per line. Use synthetic examples for this demo.</p>
+          <label for="scenario">Try a review scenario</label>
+          <div class="scenario-picker"><select id="scenario" aria-label="Review scenario"></select><button class="text-button" type="button" id="load-scenario">Load scenario</button></div>
           <button class="button primary" id="review-button" type="submit">Match delivery evidence <span aria-hidden="true">→</span></button>
           <p class="error" id="intake-error" role="alert" hidden></p>
         </form>
       </section>
       <section class="card results" aria-labelledby="results-title">
         <div class="card-heading">
-          <div><p class="eyebrow">02 / REVIEW</p><h2 id="results-title">Evidence ledger</h2></div>
+          <div><p class="eyebrow">02 · EVIDENCE REVIEW</p><h2 id="results-title">Evidence ledger</h2></div>
           <span class="model-badge">LOCAL AI</span>
         </div>
         <div id="empty" class="empty">
-          <svg viewBox="0 0 64 64" width="57" height="57" fill="none" aria-hidden="true">
-            <rect x="13" y="9" width="38" height="46" rx="6" stroke="currentColor" stroke-width="2"/>
-            <path d="M23 23h18M23 32h18M23 41h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="49" cy="48" r="8" fill="#e1eddd" stroke="currentColor" stroke-width="2"/>
-            <path d="m46 48 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg class="empty-art" viewBox="0 0 180 120" fill="none" aria-hidden="true">
+            <ellipse class="art-soft" cx="90" cy="101" rx="67" ry="9"/>
+            <rect class="art-paper" x="35" y="24" width="65" height="75" rx="10" transform="rotate(-10 35 24)"/>
+            <path class="art-muted-stroke" d="m46 42 31-5M48 53l31-5M50 64l20-3" stroke-width="3" stroke-linecap="round"/>
+            <rect class="art-paper" x="78" y="15" width="65" height="82" rx="10" transform="rotate(7 78 15)"/>
+            <rect class="art-soft" x="89" y="30" width="26" height="22" rx="5" transform="rotate(7 89 30)"/>
+            <path class="art-accent-stroke" d="m97 41 4 4 8-8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="art-muted-stroke" d="m88 63 32 4M87 74l24 3" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="137" cy="87" r="19" class="art-check-bg"/>
+            <path d="m129 87 6 6 11-13" class="art-check-stroke" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="art-accent-stroke" d="M31 70v10M26 75h10M143 25v8M139 29h8" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           <h3>Scope and evidence, side by side</h3>
           <p>Run a review to see which items have a delivery claim, which are pending, and which need more evidence.</p>
@@ -69,6 +130,14 @@
         <div id="ledger" hidden>
           <p class="ledger-note">Check the source lines yourself, then select the items you approve. A match only identifies a claim in the update.</p>
           <div id="items"></div>
+          <details class="assistant" open>
+            <summary>Review assistant <span>Propose → inspect → approve</span></summary>
+            <p>Draft a payment proposal within your limit and a clarification request for unfinished work. A proposal does not verify the artifacts or make a payment. You inspect the work and choose what to approve.</p>
+            <label for="budget">Payment proposal limit (USD)</label>
+            <div class="plan-controls"><input id="budget" type="number" min="0.01" step="0.01" inputmode="decimal"><button id="draft-plan" class="text-button" type="button">Draft payment proposal</button></div>
+            <p class="error" id="plan-error" role="alert" hidden></p>
+            <div id="plan" hidden aria-live="polite"></div>
+          </details>
           <div class="summary" aria-live="polite">
             <div><span>Agreed</span><strong id="total">$0.00</strong></div>
             <div class="approved"><span>Approved now</span><strong id="approved">$0.00</strong></div>
@@ -87,7 +156,66 @@
         </div>
       </section>
     </div>
-    <footer><span>MilestoneMatch / Hackathon prototype</span><span>USD test payments · One review per checkout</span></footer>
+    <section class="card analytics-panel" id="analytics-panel" aria-labelledby="analytics-title" hidden>
+      <div class="card-heading">
+        <div><p class="eyebrow">04 / PAYMENT & EVIDENCE ANALYTICS</p><h2 id="analytics-title">See what needs attention</h2></div>
+        <span class="model-badge">AG STUDIO</span>
+      </div>
+      <p class="ledger-note">This dashboard uses your current review. Selected amounts are separate from captured payments. Filter the evidence, inspect the ledger, or customize the layout.</p>
+      <div class="analytics-controls">
+        <button class="text-button" id="edit-dashboard" type="button" aria-pressed="false" disabled>Customize layout</button>
+        <button class="text-button" id="reset-dashboard" type="button" disabled>Reset layout</button>
+        <button class="text-button" id="close-analytics" type="button">Close analytics</button>
+      </div>
+      <p id="analytics-status" class="field-help" role="status"></p>
+      <p id="analytics-error" class="error" role="alert" hidden></p>
+      <div id="studio-dashboard" aria-label="Milestone payment analytics"></div>
+    </section>
+    <section class="card analytics-panel" id="timeline-panel" aria-labelledby="timeline-title" hidden>
+      <div class="card-heading">
+        <div><p class="eyebrow">05 / DELIVERY & PAYMENT PLANNING</p><h2 id="timeline-title">Plan the next milestone</h2></div>
+        <span class="model-badge">BRYNTUM GANTT · EVALUATION</span>
+      </div>
+      <p class="ledger-note">Dates are illustrative until you edit them. Drag or resize a bar to plan delivery; captured milestones are read-only. Links show planning order and highlight an unpaid prior milestone. They do not enforce a contract or authorize payment.</p>
+      <div class="schedule-controls">
+        <label>Planned start <input id="planned-start" type="date"></label>
+        <label>Days per milestone <input id="planned-days" type="number" min="1" max="30" step="1" value="2"></label>
+        <label class="schedule-chain"><input id="planned-chain" type="checkbox"> Link milestones in scope order</label>
+        <button class="text-button" id="apply-schedule" type="button" disabled>Apply planning dates</button>
+        <button class="text-button" id="fit-timeline" type="button" disabled>Fit milestones</button>
+        <button class="text-button" id="close-timeline" type="button">Close timeline</button>
+      </div>
+      <p id="timeline-status" class="field-help" role="status"></p>
+      <p id="timeline-error" class="error" role="alert" hidden></p>
+      <div id="milestone-timeline" aria-label="Planned milestone dates and payment status"></div>
+      <p class="field-help">Planning dates are temporary and reset on reload. They are separate from the payment record. Evaluation use only; vendor trial notices remain visible when applicable.</p>
+    </section>
+    <section class="card" id="background-panel" aria-labelledby="background-title">
+      <div class="card-heading"><div><p class="eyebrow">06 / BACKGROUND READINESS REPORT</p><h2 id="background-title">Prepare the next review</h2></div><span class="model-badge">RENDER WORKFLOWS</span></div>
+      <p class="ledger-note">Run evidence matching, readiness totals and a payment proposal as checkpointed background steps. The report uses the same local model and rules. You still inspect the work and approve payments yourself.</p>
+      <button class="button primary" id="run-background" type="button" disabled>Run background report</button>
+      <p id="background-status" class="field-help" role="status">Run a review first.</p>
+      <p id="background-error" class="error" role="alert" hidden></p>
+      <div id="background-result"></div>
+    </section>
+    <section class="card" id="supplies-panel" aria-labelledby="supplies-title">
+      <div class="card-heading"><div><p class="eyebrow">07 / PROJECT SUPPLIES</p><h2 id="supplies-title">Find supplies for the next milestone</h2></div><span class="model-badge">CHANNEL3</span></div>
+      <p class="ledger-note">Find equipment for delivery or testing. Review results against a separate per-item budget; supply prices never change your approved milestone total.</p>
+      <form id="supplies-form">
+        <label for="supply-query">What does this project need?</label>
+        <input id="supply-query" required minlength="3" maxlength="200" placeholder="USB microphone for recording the project demo">
+        <label for="supply-budget">Maximum per item (USD)</label>
+        <input id="supply-budget" type="number" min="1" max="10000" step="0.01" value="75" required>
+        <button class="button primary" id="search-supplies" type="submit" disabled>Search project supplies</button>
+      </form>
+      <p id="supplies-status" class="field-help" role="status">Run a review to connect supply research to your project.</p>
+      <p id="supplies-error" class="error" role="alert" hidden></p>
+      <div id="supply-results" class="supply-results"></div>
+      <p class="field-help">US retailer offers in USD. Prices exclude any unspecified shipping and taxes; stock can change. Retailer links may earn affiliate commission and open real merchant sites. This feature does not purchase products or charge PayPal.</p>
+    </section>
+    <footer><span>MilestoneMatch <span aria-hidden="true">·</span> Hackathon prototype</span><span>USD test payments · Reviews expire after 8 hours or a server restart</span></footer>
   </main>
+    </div>
+  </div>
 </body>
 </html>

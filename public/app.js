@@ -1,3 +1,6 @@
+import { analyticsRows } from './analytics-data.js';
+import { localDateInput, timelineSnapshot } from './timeline-data.js';
+
 const byId = (id) => document.getElementById(id);
 const form = byId('intake');
 const reviewButton = byId('review-button');
@@ -19,6 +22,25 @@ let review;
 let order;
 let selected = new Set();
 let receipt;
+let plan;
+let checkoutPending = false;
+let dashboard;
+let dashboardRows = [];
+window.addEventListener('themechange', ({ detail }) => { dashboard?.setTheme(detail.theme); timeline?.setTheme(detail.theme); });
+let dashboardEditing = false;
+let backgroundWaiting = false;
+let backgroundRunId;
+let supplySearching = false;
+let supplyGeneration = 0;
+let timeline;
+let timelineLoading = false;
+let timelineStyles;
+let schedule = { start: localDateInput(), days: 2, dependencies: false };
+byId('planned-start').value = schedule.start;
+
+function scheduleSnapshot() {
+  return timelineSnapshot(review, [...selected], receipt, schedule.start, schedule.days, schedule.dependencies);
+}
 
 function showError(id, message = '') {
   const element = byId(id);
@@ -39,13 +61,15 @@ async function post(url, payload) {
 
 function updateTotals() {
   const amount = review.items.reduce((total, item) => total + (selected.has(item.id) ? item.cents : 0), 0);
+  byId('review-context').textContent = review.title;
+  byId('desk-state').textContent = receipt?.status === 'COMPLETED' ? 'Sandbox payment captured' : amount ? `${money(amount)} selected for payment` : `${review.items.length} milestones · awaiting your approval`;
   byId('total').textContent = money(review.total);
   byId('approved').textContent = money(amount);
   byId('held').textContent = money(review.total - amount);
   const note = byId('payment-note');
   checkoutButton.hidden = Boolean(order?.returned || receipt);
   captureButton.hidden = !order?.returned || Boolean(receipt && receipt.status !== 'PENDING');
-  checkoutButton.disabled = !amount || !config.sandboxConfigured;
+  checkoutButton.disabled = checkoutPending || !amount || !config.sandboxConfigured;
   if (receipt?.status === 'COMPLETED') note.textContent = 'PayPal confirmed the sandbox capture.';
   else if (receipt?.status === 'PENDING') note.textContent = 'PayPal is still processing this capture. Check its status below.';
   else if (receipt) note.textContent = 'Review the capture status in the PayPal Developer Dashboard.';
@@ -54,6 +78,24 @@ function updateTotals() {
   else if (!config.sandboxConfigured) note.textContent = 'AI review is available. See the README to connect PayPal Sandbox.';
   else if (amount) note.textContent = 'PayPal will receive the approved total of ' + money(amount) + '.';
   else note.textContent = 'Select the items you approve to continue.';
+  byId('draft-plan').disabled = Boolean(order) || checkoutPending;
+  byId('budget').disabled = Boolean(order) || checkoutPending;
+  const apply = byId('apply-plan');
+  if (apply) apply.disabled = Boolean(order) || checkoutPending || !plan?.proposedIds.length;
+  dashboardRows = analyticsRows(review, [...selected], receipt);
+  dashboard?.update(dashboardRows);
+  if (config.workflowsConfigured && byId('background-status').textContent === 'Run a review first.') byId('background-status').textContent = 'Ready to prepare a report for this review.';
+  if (config.channel3Configured && byId('supplies-status').textContent === 'Run a review to connect supply research to your project.') byId('supplies-status').textContent = 'Set a separate supply budget and search for this project.';
+  byId('run-background').disabled = !review || !config.workflowsConfigured || backgroundWaiting;
+  byId('search-supplies').disabled = !review || !config.channel3Configured || supplySearching;
+  byId('show-analytics').disabled = !review || config.studioEnabled === false;
+  byId('show-analytics').title = config.studioEnabled === false
+    ? 'A trial or commercial license is required for hosted analytics.' : 'Analyze the current review';
+  byId('show-timeline').disabled = !review || timelineLoading || config.timelineEnabled === false;
+  byId('show-timeline').title = config.timelineEnabled === false ? 'Configure a Bryntum Gantt trial license for hosted evaluation.' : 'Plan milestone dates';
+  if (timeline) timeline.update(scheduleSnapshot());
+  for (const id of ['planned-start', 'planned-days', 'planned-chain']) byId(id).disabled = receipt?.status === 'COMPLETED';
+  byId('apply-schedule').disabled = !timeline || receipt?.status === 'COMPLETED';
 }
 
 function node(tag, className, value) {
@@ -79,7 +121,7 @@ function render() {
       checkbox.type = 'checkbox';
       checkbox.id = item.id;
       checkbox.checked = selected.has(item.id);
-      checkbox.disabled = Boolean(order);
+      checkbox.disabled = Boolean(order) || checkoutPending;
       checkbox.addEventListener('change', () => {
         if (checkbox.checked) selected.add(item.id);
         else selected.delete(item.id);
@@ -99,7 +141,12 @@ function render() {
         ? 'Try a more specific description.'
         : 'No matching line in the delivery update.';
     detail.append(document.createTextNode(explanation));
-    row.append(heading, detail);
+    const reasoning = node('details', 'reasoning');
+    reasoning.append(node('summary', '', 'Why this decision?'));
+    for (const reason of item.reasons ?? []) reasoning.append(node('p', '', reason));
+    reasoning.append(node('p', 'next-action', item.nextAction));
+    if (item.evidence.length) reasoning.append(node('p', '', 'Source: ' + item.evidence.map(({ id }) => id).join(', ')));
+    row.append(heading, detail, reasoning);
     items.append(row);
   }
 
@@ -130,9 +177,34 @@ function saveCheckout() {
 }
 
 function clearReview() {
+  byId('review-context').textContent = 'New project review';
+  byId('desk-state').textContent = 'Ready for your scope';
+  backgroundRunId = undefined;
+  byId('run-background').disabled = true;
+  byId('background-result').replaceChildren();
+  byId('background-status').textContent = 'Run a review first.';
+  showError('background-error');
+  supplyGeneration++;
+  byId('supply-results').replaceChildren();
+  showError('supplies-error');
+  byId('search-supplies').disabled = true;
+  byId('supplies-status').textContent = 'Run a review to connect supply research to your project.';
   review = undefined;
   order = undefined;
   receipt = undefined;
+  plan = undefined;
+  checkoutPending = false;
+  dashboardRows = [];
+  dashboard?.update([]);
+  timeline?.destroy();
+  timeline = undefined;
+  byId('timeline-panel').hidden = true;
+  byId('show-timeline').disabled = true;
+  byId('analytics-panel').hidden = true;
+  byId('show-analytics').disabled = true;
+  byId('plan').replaceChildren();
+  byId('plan').hidden = true;
+  showError('plan-error');
   selected.clear();
   sessionStorage.removeItem(storageKey);
   if (location.search) history.replaceState(null, '', '/');
@@ -152,21 +224,186 @@ byId('sample').addEventListener('click', async () => {
   fields(sample);
 });
 
+byId('load-scenario').addEventListener('click', () => {
+  const example = config.scenarios?.find(({ id }) => id === byId('scenario').value);
+  if (!example) return;
+  clearReview();
+  showError('intake-error');
+  fields(example);
+});
+
+byId('draft-plan').addEventListener('click', async () => {
+  if (order || checkoutPending) return;
+  const currentReview = review;
+  const button = byId('draft-plan');
+  const budgetValue = byId('budget').value;
+  showError('plan-error');
+  button.disabled = true;
+  plan = undefined;
+  byId('plan').replaceChildren();
+  byId('plan').hidden = true;
+  try {
+    const value = budgetValue;
+    if (!/^\d+(?:\.\d{1,2})?$/.test(value)) throw new Error('Enter a USD limit with at most two decimal places.');
+    const result = await post('/api/reviews/' + currentReview.id + '/plan', { budgetCents: Math.round(Number(value) * 100) });
+    if (review !== currentReview || byId('budget').value !== budgetValue) return;
+    plan = result;
+    const box = byId('plan');
+    box.replaceChildren(node('h3', '', money(plan.amount) + ' proposed · ' + money(plan.unpaid) + ' unpaid'));
+    box.append(node('p', '', plan.policy));
+    const trace = node('ol', 'plan-steps');
+    for (const step of plan.steps) {
+      const item = review.items.find(({ id }) => id === step.itemId);
+      trace.append(node('li', '', (step.action === 'propose' ? 'Propose: ' : 'Withhold: ') + item.description + ' — ' + step.reason));
+    }
+    box.append(trace);
+    const apply = node('button', 'text-button', 'Apply proposal to selection');
+    apply.id = 'apply-plan';
+    apply.type = 'button';
+    apply.addEventListener('click', () => {
+      if (order || checkoutPending || !plan) return;
+      selected = new Set(plan.proposedIds);
+      render();
+    });
+    box.append(apply);
+    if (plan.clarification) {
+      const label = node('label', '', 'Clarification draft · copy and send yourself');
+      label.htmlFor = 'clarification';
+      const draft = node('textarea');
+      draft.id = 'clarification';
+      draft.readOnly = true;
+      draft.rows = 4;
+      draft.value = 'Please share completion evidence for the following scope items:\n' + plan.clarification;
+      box.append(label, draft);
+    }
+    box.hidden = false;
+    updateTotals();
+  } catch (error) {
+    if (review === currentReview) showError('plan-error', error.message);
+  } finally {
+    button.disabled = Boolean(order) || checkoutPending;
+  }
+});
+
+byId('budget').addEventListener('input', () => {
+  plan = undefined;
+  byId('plan').hidden = true;
+});
+
+byId('show-analytics').addEventListener('click', async () => {
+  if (!review || config.studioEnabled === false) return;
+  byId('show-analytics').disabled = true;
+  byId('analytics-panel').hidden = false;
+  byId('analytics-status').textContent = 'Loading analytics…';
+  showError('analytics-error');
+  try {
+    if (!dashboard) {
+      const { mountDashboard } = await import('/generated/studio.js');
+      if (!review) return;
+      dashboard = mountDashboard(byId('studio-dashboard'), dashboardRows, {
+        licenseKey: config.studioLicenseKey,
+        nonce: document.querySelector('meta[name="studio-style-nonce"]').content,
+        onError: (message) => showError('analytics-error', message),
+      });
+    }
+    byId('edit-dashboard').disabled = false;
+    byId('reset-dashboard').disabled = false;
+    byId('analytics-status').textContent = config.studioLicenseKey
+      ? 'Current review only. Layout changes are saved in this browser tab.'
+      : 'Local evaluation · AG Studio displays its license watermark. Layout changes are saved in this browser tab.';
+    byId('analytics-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    byId('analytics-status').textContent = '';
+    showError('analytics-error', 'Analytics could not load. Run npm install and restart the app, then retry. The payment desk is still available.');
+  } finally { byId('show-analytics').disabled = !review; }
+});
+
+byId('close-analytics').addEventListener('click', () => { byId('analytics-panel').hidden = true; });
+
+function loadTimelineStyles() {
+  if (!timelineStyles) timelineStyles = new Promise((resolve, reject) => {
+    const link = document.createElement('link');
+    link.rel = 'stylesheet'; link.href = '/generated/timeline.css';
+    link.onload = resolve;
+    link.onerror = () => { link.remove(); timelineStyles = undefined; reject(new Error('Styles unavailable')); };
+    document.head.append(link);
+  });
+  return timelineStyles;
+}
+
+byId('show-timeline').addEventListener('click', async () => {
+  if (!review || timelineLoading || config.timelineEnabled === false) return;
+  timelineLoading = true;
+  byId('show-timeline').disabled = true;
+  byId('timeline-panel').hidden = false;
+  byId('timeline-status').textContent = 'Loading milestone timeline…';
+  showError('timeline-error');
+  try {
+    if (!timeline) {
+      const [{ mountTimeline }] = await Promise.all([import('/generated/timeline.js'), loadTimelineStyles()]);
+      if (!review) return;
+      timeline = mountTimeline(byId('milestone-timeline'), scheduleSnapshot(), (message) => { byId('timeline-status').textContent = message; }, config.bryntumLicenseKey);
+    }
+    byId('timeline-status').textContent = 'Gantt evaluation · Planned dates only. Payment status follows the current review and confirmed capture.';
+    byId('apply-schedule').disabled = receipt?.status === 'COMPLETED';
+    byId('fit-timeline').disabled = false;
+    byId('timeline-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });
+  } catch {
+    showError('timeline-error', 'The trial timeline could not load. Check the browser console for trial or setup errors. Review and checkout remain available.');
+  } finally {
+    timelineLoading = false;
+    byId('show-timeline').disabled = !review || config.timelineEnabled === false;
+  }
+});
+
+byId('apply-schedule').addEventListener('click', () => {
+  if (!review || !timeline || receipt?.status === 'COMPLETED') return;
+  showError('timeline-error');
+  try {
+    const next = { start: byId('planned-start').value, days: Number(byId('planned-days').value), dependencies: byId('planned-chain').checked };
+    const snapshot = timelineSnapshot(review, [...selected], receipt, next.start, next.days, next.dependencies);
+    timeline.update(snapshot, true);
+    schedule = next;
+    byId('timeline-status').textContent = 'Planning dates applied. These dates reset on reload; no payment selection or capture changed.';
+  } catch (error) { showError('timeline-error', error.message); }
+});
+byId('close-timeline').addEventListener('click', () => { byId('timeline-panel').hidden = true; });
+byId('fit-timeline').addEventListener('click', () => { void timeline?.fit(); });
+byId('edit-dashboard').addEventListener('click', () => {
+  if (!dashboard) return;
+  dashboardEditing = !dashboardEditing;
+  dashboard.setEditing(dashboardEditing);
+  byId('edit-dashboard').textContent = dashboardEditing ? 'Finish customizing' : 'Customize layout';
+  byId('edit-dashboard').setAttribute('aria-pressed', String(dashboardEditing));
+});
+byId('reset-dashboard').addEventListener('click', () => {
+  if (dashboard) dashboard = dashboard.reset();
+  dashboardEditing = false;
+  byId('edit-dashboard').textContent = 'Customize layout';
+  byId('edit-dashboard').setAttribute('aria-pressed', 'false');
+  showError('analytics-error');
+});
+
 form.addEventListener('submit', async (event) => {
   event.preventDefault();
   clearReview();
   showError('intake-error');
   const input = Object.fromEntries(new FormData(form));
   reviewButton.disabled = true;
+  reviewButton.textContent = 'Matching delivery evidence…';
+  form.setAttribute('aria-busy', 'true');
   try {
     const result = await post('/api/reviews', input);
     if (Object.keys(input).some((name) => form.elements[name].value !== input[name])) return;
     review = result;
+    byId('budget').value = (review.total / 100).toFixed(2);
     render();
   } catch (error) {
     showError('intake-error', error.message);
   } finally {
     reviewButton.disabled = false;
+    reviewButton.textContent = 'Match delivery evidence →';
+    form.removeAttribute('aria-busy');
   }
 });
 
@@ -174,7 +411,8 @@ checkoutButton.addEventListener('click', async () => {
   const currentReview = review;
   const approvedIds = [...selected];
   showError('payment-error');
-  checkoutButton.disabled = true;
+  checkoutPending = true;
+  updateTotals();
   byId('items').querySelectorAll('input').forEach((input) => { input.disabled = true; });
   try {
     const payment = await post('/api/reviews/' + currentReview.id + '/order', { approvedIds });
@@ -187,6 +425,11 @@ checkoutButton.addEventListener('click', async () => {
     order ??= { cancelled: true };
     render();
     showError('payment-error', error.message);
+  } finally {
+    if (review === currentReview) {
+      checkoutPending = false;
+      updateTotals();
+    }
   }
 });
 
@@ -207,31 +450,122 @@ captureButton.addEventListener('click', async () => {
   }
 });
 
-byId('export').addEventListener('click', () => {
+byId('export').addEventListener('click', async () => {
   if (receipt?.status !== 'COMPLETED') return;
-  const record = {
-    project: review.title,
-    reviewId: review.id,
-    currency: 'USD',
-    environment: 'sandbox',
-    orderId: order.orderId,
-    receipt,
-    scope: review.items.map((item) => ({ ...item, approved: selected.has(item.id) })),
-  };
-  const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }));
-  const download = node('a');
-  download.href = url;
-  download.download = 'milestone-match-' + order.orderId + '.json';
-  download.click();
-  setTimeout(() => URL.revokeObjectURL(url), 1000);
+  const currentReview = review;
+  byId('export').disabled = true;
+  try {
+    const record = await post('/api/reviews/' + currentReview.id + '/record', {});
+    if (review !== currentReview) return;
+    const url = URL.createObjectURL(new Blob([JSON.stringify(record, null, 2)], { type: 'application/json' }));
+    const download = node('a');
+    download.href = url;
+    download.download = 'milestone-match-' + order.orderId + '.json';
+    download.click();
+    setTimeout(() => URL.revokeObjectURL(url), 1000);
+  } catch (error) {
+    if (review === currentReview) showError('payment-error', error.message);
+  } finally { byId('export').disabled = false; }
+});
+
+byId('run-background').addEventListener('click', async () => {
+  if (!review || backgroundWaiting || !config.workflowsConfigured) return;
+  const current = review;
+  backgroundWaiting = true;
+  byId('run-background').disabled = true;
+  showError('background-error');
+  byId('background-status').textContent = 'Submitting the background readiness report…';
+  try {
+    const job = await post('/api/reviews/' + current.id + '/report', {});
+    backgroundRunId = job.runId;
+    const deadline = Date.now() + 150000;
+    while (review === current && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      if (review !== current) return;
+      const result = await post('/api/reviews/' + current.id + '/report-status', {});
+      if (review !== current) return;
+      backgroundRunId = result.runId;
+      if (result.status === 'failed') throw new Error('The background run failed. Check its run in Render. Normal review remains available.');
+      byId('background-status').textContent = `Render run ${backgroundRunId} · ${result.status}`;
+      if (result.status === 'succeeded') {
+        const report = result.report;
+        byId('background-result').replaceChildren(
+          node('p', '', `${report.itemCount} milestones · ${report.blockedCount} need evidence · ${money(report.blockedCents)} withheld from this proposal.`),
+          node('p', '', `Suggested after human inspection: ${money(report.proposal.amount)}. No approval or payment was made.`),
+          node('p', '', report.proposal.clarification || 'No clarification request in this report.'),
+        );
+        return;
+      }
+    }
+    if (review === current) byId('background-status').textContent = `Render run ${backgroundRunId} is still processing. Click again to check the same run.`;
+  } catch (error) {
+    if (review === current) showError('background-error', error.message);
+  } finally {
+    backgroundWaiting = false;
+    byId('run-background').disabled = !review || !config.workflowsConfigured;
+  }
+});
+
+byId('supplies-form').addEventListener('submit', async (event) => {
+  event.preventDefault();
+  if (!review || supplySearching || !config.channel3Configured) return;
+  const current = review;
+  const generation = ++supplyGeneration;
+  supplySearching = true;
+  byId('search-supplies').textContent = 'Searching suppliers…';
+  byId('supplies-form').setAttribute('aria-busy', 'true');
+  byId('search-supplies').disabled = true;
+  showError('supplies-error');
+  byId('supply-results').replaceChildren();
+  byId('supplies-status').textContent = 'Searching Channel3 and refreshing retailer offers…';
+  try {
+    const result = await post('/api/reviews/' + current.id + '/supplies', {
+      query: byId('supply-query').value, budgetCents: Math.round(Number(byId('supply-budget').value) * 100),
+    });
+    if (review !== current || generation !== supplyGeneration) return;
+    for (const product of result.products) {
+      const card = node('article', 'supply-card');
+      card.append(node('h3', '', product.title));
+      for (const offer of product.offers) {
+        const line = node('p', '', `${money(offer.cents)} · ${offer.availability} · `);
+        const link = node('a', '', `View at ${offer.retailer} ↗`);
+        link.href = offer.url; link.target = '_blank'; link.rel = 'noopener noreferrer sponsored';
+        line.append(link); card.append(line);
+      }
+      byId('supply-results').append(card);
+    }
+    byId('supplies-status').textContent = result.products.length
+      ? `${result.products.length} products within your per-item budget · Channel3 offers checked ${new Date(result.checkedAt).toLocaleTimeString()}. Milestone payments are unchanged.`
+      : 'No refreshed offers within this budget. Try another description or increase the per-item limit.';
+  } catch (error) {
+    if (review === current && generation === supplyGeneration) {
+      showError('supplies-error', error.message);
+      byId('supplies-status').textContent = 'Supply search did not complete. Your review and payment selection are unchanged.';
+    }
+  } finally {
+    supplySearching = false;
+    byId('search-supplies').textContent = 'Search project supplies';
+    byId('supplies-form').removeAttribute('aria-busy');
+    byId('search-supplies').disabled = !review || !config.channel3Configured;
+  }
 });
 
 config = await configReady;
+if (!config.workflowsConfigured) byId('background-status').textContent = 'Background reports need a Render Workflows connection. Normal review remains available.';
+if (!config.channel3Configured) byId('supplies-status').textContent = 'Supply search needs a Channel3 connection. Review and PayPal checkout remain available.';
+for (const example of config.scenarios ?? []) {
+  const option = node('option', '', example.label);
+  option.value = example.id;
+  byId('scenario').append(option);
+}
 const query = new URLSearchParams(location.search);
-const saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null');
+let saved;
+try { saved = JSON.parse(sessionStorage.getItem(storageKey) || 'null'); }
+catch { sessionStorage.removeItem(storageKey); }
 if (saved && (!query.has('checkout') || saved.review.id === query.get('review'))) {
   const approved = query.get('checkout') === 'approved' && query.get('token') === saved.order.orderId;
   review = saved.review;
+  byId('budget').value = (review.total / 100).toFixed(2);
   fields(saved.input);
   selected = new Set(saved.approvedIds);
   order = { ...saved.order, returned: approved || saved.order.returned, cancelled: query.get('checkout') === 'cancelled' };
