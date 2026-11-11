@@ -11,14 +11,18 @@
     "prestart": "npm run build",
     "start": "node --env-file-if-exists=.env server.mjs",
     "test": "node --test",
-    "evaluate": "node evaluate.mjs"
+    "evaluate": "node evaluate.mjs",
+    "typecheck": "tsc -p tsconfig.gantt.json"
   },
   "dependencies": {
-    "@bryntum/scheduler": "npm:@bryntum/scheduler-trial@7.3.8",
+    "@bryntum/core-enterprise": "8.0.0",
+    "@bryntum/gantt-enterprise": "8.0.0",
+    "@bryntum/grid-enterprise": "8.0.0",
     "@paypal/paypal-server-sdk": "2.5.0",
     "ag-studio": "3.1.0"
   },
   "devDependencies": {
-    "esbuild": "0.27.0"
+    "esbuild": "0.27.0",
+    "typescript": "5.9.3"
   }
 }

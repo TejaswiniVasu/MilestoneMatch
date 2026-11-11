@@ -15,7 +15,7 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 - AG Studio dashboard with current-review data, a custom query-backed summary,
   filter-linked chart and grid, themed layout, editing/reset and mobile stacking.
   Local evaluation only without a key; no Studio agent integration yet.
-- Bryntum Scheduler local trial: draggable planned dates, scope-order dependency
+- Bryntum Gantt Enterprise evaluation: draggable planned dates, scope-order dependency
   links, live payment states, and captured-item date locking. Dates are temporary;
   there is no automatic dependency rescheduling or payment execution.
 - Previous Windows version: owner reported a completed USD 240 Sandbox capture.
@@ -34,7 +34,7 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 | Best Use of Agentic Commerce | Bounded proposal helper with mandatory human approval | Model-directed tool loop with policy limits and execution trace; current helper is deterministic, not an autonomous commerce agent |
 | Best Use of AG Grid | Local AG Studio dashboard with a custom summary, filtering, theming and layout editing | Obtain trial for hosting/judging; add and validate meaningful Studio Agent Framework behavior and richer agency data |
 | Best Use of APIMatic | Sponsor-linked Context Plugin skills consulted for the PayPal Server SDK 2.5 migration and recovery/error handling; provenance recorded in APIMATIC.md | Hosted Sandbox checkout and record verified by entrant; retain evidence and confirm organizer eligibility; no editor-wide plugin installation is claimed |
-| Best Use of Bryntum | Local Scheduler trial with editable planned dates, dependency links and capture-aware read-only items | Obtain appropriate licensing for hosted/judging use; add durable schedules and richer dependency handling; do not claim automatic rescheduling |
+| Best Use of Bryntum | Gantt Enterprise 8.0.0 with editable planned dates, dependency links and capture-aware read-only items | Configure and verify the Gantt trial key on Render; add durable schedules and richer dependency handling; do not claim automatic rescheduling |
 | Best Use of Channel3 | Not integrated | Obtain API key; implement useful agency procurement searches with actual source prices/availability, separate from service payment |
 | Best Use of Render | Live Render web service with entrant-verified USD 240 Sandbox capture and record | Add/test meaningful Workflows orchestration for evidence jobs; hosting alone does not establish award eligibility |
 

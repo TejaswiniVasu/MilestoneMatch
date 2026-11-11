@@ -69,7 +69,8 @@ library's positioning. No external script CDN is required.
 
 ## Bryntum delivery planning
 
-After a review, **Open timeline** loads the public Bryntum Scheduler trial.
+After a review, **Open timeline** loads Bryntum Gantt Enterprise 8.0.0. The integration module is TypeScript
+(`studio/timeline.ts`), built with esbuild; `npm run typecheck` checks its types.
 The timeline shows each scope item, its amount, payment state, and planned dates.
 Dates begin as an illustrative schedule, not dates extracted from the agreement.
 Choose a start date and days per milestone, then **Apply planning dates**.
@@ -83,13 +84,24 @@ order, or captures a payment. Captured milestones become read-only. Updating a
 payment selection preserves dragged dates while the page remains open.
 
 Planning dates are temporary: reloads and checkout redirects reset them. They are
-not included in the canonical payment record. This integration is available only
-on loopback origins for local trial evaluation; hosting requires a review of
-Bryntum licensing and replacement with the appropriate licensed package. The
-trial watermark/notices are retained. Vendor bundles, themes and fonts are
-generated from the pinned dependency and are not committed to this MIT repository.
-The core source imports the normal `@bryntum/scheduler` alias so a future licensed
-installation can replace the trial without rewriting the integration.
+not included in the canonical payment record. Tasks are manually scheduled: links
+are visual planning order, not automatic dependency rescheduling.
+
+Gantt Enterprise runs a fully functional 14-day trial without a key. A registered
+trial key provides 45 days, subject to Bryntum's evaluation terms. Set
+`BRYNTUM_LICENSE_KEY` privately in Render's Environment or in the local `.env`;
+the app passes this browser-visible vendor license to `bryntum.licenseKey` once
+before creating Gantt. Hosted timeline access requires this setting. Do not commit
+keys. If a key does not cover Gantt Enterprise, the vendor may mask the component;
+obtain the correct key instead of suppressing the notice. No real key is bundled.
+Generated vendor bundles, themes and fonts are not committed to this MIT repository.
+
+Potential next Enterprise features: **critical paths** to identify schedule drivers,
+**baselines** to compare a revised plan, and **task editing** for richer planning.
+These are not implemented or claimed by this demo. For richer development guidance,
+install the [Bryntum AI Agent skills](https://github.com/bryntum/skills) and
+[Bryntum MCP Server](https://mcp.bryntum.com). See the
+[Gantt docs](https://bryntum.com/products/gantt-next/docs/?utm_source=ax).
 
 [Official sponsor trial guidance](https://paypalaihackathon.devpost.com/details/bryntum)
 

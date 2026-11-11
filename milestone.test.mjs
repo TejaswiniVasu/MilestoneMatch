@@ -189,6 +189,10 @@ test('HTTP review, exact PayPal request, concurrent retries and receipt', async 
   const hosted = buildServer({ origin: 'https://demo.example', payments });
   assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.studioEnabled, false);
   assert.equal((await request(hosted, '/api/config', {}, {}, 'GET')).body.timelineEnabled, false);
+  const licensed = buildServer({ origin: 'https://demo.example', payments, bryntumLicenseKey: 'fixture-license' });
+  const licensedConfig = (await request(licensed, '/api/config', {}, {}, 'GET')).body;
+  assert.equal(licensedConfig.timelineEnabled, true);
+  assert.equal(licensedConfig.bryntumLicenseKey, 'fixture-license');
   assert.match((await request(server, '/', {}, {}, 'GET')).body, /Evidence ledger/);
   const rejected = await request(server, '/api/reviews', sample, { origin: 'https://unrelated.example' });
   assert.equal(rejected.code, 403);

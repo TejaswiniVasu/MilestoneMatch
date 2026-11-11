@@ -35,7 +35,7 @@ async function readBody(request) {
   }
 }
 
-export function buildServer({ origin, payments, studioLicenseKey = '' }) {
+export function buildServer({ origin, payments, studioLicenseKey = '', bryntumLicenseKey = '' }) {
   const reviews = new Map();
   const ttl = 8 * 60 * 60 * 1000;
   return createServer(async (request, response) => {
@@ -69,7 +69,7 @@ export function buildServer({ origin, payments, studioLicenseKey = '' }) {
       if (request.method === 'GET' && pathname === '/api/config') {
         const local = ['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname);
         return json(200, { sandboxConfigured: payments.configured, sample, scenarios, studioLicenseKey,
-          studioEnabled: local || Boolean(studioLicenseKey), timelineEnabled: local });
+          studioEnabled: local || Boolean(studioLicenseKey), bryntumLicenseKey, timelineEnabled: local || Boolean(bryntumLicenseKey) });
       }
       if (request.method === 'GET' && pathname === '/health') return json(200, { status: 'ok' });
       if (request.method !== 'POST') throw new AppError(404, 'This page does not exist.');
@@ -163,7 +163,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     clientSecret: process.env.PAYPAL_CLIENT_SECRET,
     origin,
   });
-  buildServer({ origin, payments, studioLicenseKey: process.env.AG_STUDIO_LICENSE_KEY }).listen(port, host, () => {
+  buildServer({ origin, payments, studioLicenseKey: process.env.AG_STUDIO_LICENSE_KEY, bryntumLicenseKey: process.env.BRYNTUM_LICENSE_KEY }).listen(port, host, () => {
     console.log('MilestoneMatch at ' + origin);
   });
 }

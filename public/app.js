@@ -81,7 +81,7 @@ function updateTotals() {
   byId('show-analytics').title = config.studioEnabled === false
     ? 'A trial or commercial license is required for hosted analytics.' : 'Analyze the current review';
   byId('show-timeline').disabled = !review || timelineLoading || config.timelineEnabled === false;
-  byId('show-timeline').title = config.timelineEnabled === false ? 'The Bryntum trial timeline is available only for local evaluation.' : 'Plan milestone dates';
+  byId('show-timeline').title = config.timelineEnabled === false ? 'Configure a Bryntum Gantt trial license for hosted evaluation.' : 'Plan milestone dates';
   if (timeline) timeline.update(scheduleSnapshot());
   for (const id of ['planned-start', 'planned-days', 'planned-chain']) byId(id).disabled = receipt?.status === 'COMPLETED';
   byId('apply-schedule').disabled = !timeline || receipt?.status === 'COMPLETED';
@@ -319,9 +319,9 @@ byId('show-timeline').addEventListener('click', async () => {
     if (!timeline) {
       const [{ mountTimeline }] = await Promise.all([import('/generated/timeline.js'), loadTimelineStyles()]);
       if (!review) return;
-      timeline = mountTimeline(byId('milestone-timeline'), scheduleSnapshot(), (message) => { byId('timeline-status').textContent = message; });
+      timeline = mountTimeline(byId('milestone-timeline'), scheduleSnapshot(), (message) => { byId('timeline-status').textContent = message; }, config.bryntumLicenseKey);
     }
-    byId('timeline-status').textContent = 'Local trial · Planned dates only. Payment status follows the current review and confirmed capture.';
+    byId('timeline-status').textContent = 'Gantt evaluation · Planned dates only. Payment status follows the current review and confirmed capture.';
     byId('apply-schedule').disabled = receipt?.status === 'COMPLETED';
     byId('fit-timeline').disabled = false;
     byId('timeline-panel').scrollIntoView({ behavior: 'smooth', block: 'start' });

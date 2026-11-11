@@ -10,8 +10,8 @@ await Promise.all([build({
   minify: true,
   legalComments: 'eof',
 }), build({
-  entryPoints: ['studio/timeline.js'], outfile: 'public/generated/timeline.js',
-  bundle: true, format: 'esm', platform: 'browser', target: ['es2022'], minify: true,
+  entryPoints: ['studio/timeline.ts'], outfile: 'public/generated/timeline.js',
+  bundle: true, format: 'esm', platform: 'browser', target: ['chrome123', 'edge123', 'firefox120', 'safari17.5'], minify: true,
   legalComments: 'eof',
   loader: { '.woff': 'file', '.woff2': 'file', '.ttf': 'file' },
 })]);

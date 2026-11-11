@@ -30,8 +30,8 @@ order/capture events.
 
 **Built with**  
 Node.js, vanilla JavaScript, HTML, CSS, an in-process supervised text classifier,
-PayPal Server SDK 2.5 (APIMatic-generated) with Orders v2 in Sandbox, AG Studio 3.1, and Bryntum Scheduler
-7.3.8 (local trial), with esbuild-generated browser bundles.
+PayPal Server SDK 2.5 (APIMatic-generated) with Orders v2 in Sandbox, AG Studio 3.1, and Bryntum Gantt Enterprise
+8.0.0 (evaluation), with esbuild-generated browser bundles.
 
 **How AG Studio is used**
 The current review drives a themed analytics dashboard. A custom evidence-summary
@@ -41,12 +41,13 @@ customize and reset the layout. This uses local evaluation mode unless a trial o
 commercial license is configured. Studio's agent framework is not integrated.
 
 **How Bryntum is used**
-Scheduler shows planned dates and payment states for the current review's
+Gantt shows planned dates and payment states for the current review's
 milestones. Users can drag/resize uncaptured items, display scope-order dependency
 links, and see captured milestones become read-only. Dates are illustrative until
 edited and reset on reload/checkout redirects. The planner does not automatically
 reschedule dependent tasks, authorize payment, or change approval decisions. This
-is a local trial integration with the vendor watermark intact.
+uses an evaluation license via BRYNTUM_LICENSE_KEY for hosted access. Vendor
+trial notices remain intact; hosted key validation still needs confirmation.
 
 **How AI is used**  
 The model maps differently worded scope and update lines into supported deliverable categories using learned text feature weights. It can abstain. Rules flag pending language and ambiguous evidence, and the reviewer makes the acceptance decision.

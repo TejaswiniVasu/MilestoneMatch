@@ -3,7 +3,7 @@ services:
     name: milestone-match
     runtime: node
     plan: free
-    buildCommand: npm ci --include=dev && npm run build && npm test && npm run evaluate
+    buildCommand: npm ci --include=dev && npm run typecheck && npm run build && npm test && npm run evaluate
     # Bundles are produced during the build, outside the 512 MB web runtime.
     # npm start runs prestart and would unnecessarily rebuild them here.
     startCommand: node server.mjs
