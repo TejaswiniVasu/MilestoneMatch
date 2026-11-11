@@ -1,10 +1,10 @@
 import type { ColumnStore } from '@bryntum/grid-enterprise';
 import { Gantt } from '@bryntum/gantt-enterprise';
-import { StringHelper } from '@bryntum/core-enterprise';
+import { StringHelper, DomHelper } from '@bryntum/core-enterprise';
 import '@bryntum/core-enterprise/fontawesome/css/fontawesome.css';
 import '@bryntum/core-enterprise/fontawesome/css/solid.css';
 import '@bryntum/gantt-enterprise/gantt.css';
-import '@bryntum/gantt-enterprise/svalbard-light.css';
+import '@bryntum/gantt-enterprise/svalbard.css';
 
 declare const bryntum: { licenseKey?: string };
 type Snapshot = {
@@ -19,6 +19,8 @@ export function mountTimeline(element: HTMLElement, snapshot: Snapshot, onChange
     bryntum.licenseKey = licenseKey;
     registeredKey = licenseKey;
   }
+  const setTheme = (theme: string) => { DomHelper.colorScheme = theme === 'dark' ? 'dark' : 'light'; };
+  setTheme(document.documentElement.dataset.theme ?? 'light');
   const tasks = (next: Snapshot) => next.events.map(event => {
     const row = next.resources.find(row => row.id === event.id)!;
     return { id: event.id, name: row.name, startDate: event.startDate,
@@ -77,6 +79,7 @@ export function mountTimeline(element: HTMLElement, snapshot: Snapshot, onChange
       reviewId = next.reviewId;
     },
     fit,
+    setTheme,
     destroy() { resizeObserver.disconnect(); gantt.destroy(); },
   };
 }

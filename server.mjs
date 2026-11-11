@@ -13,6 +13,7 @@ import { sample, scenarios } from './example.mjs';
 const staticPaths = new Map([
   ['/', ['index.html', 'text/html; charset=utf-8']],
   ['/style.css', ['style.css', 'text/css; charset=utf-8']],
+  ['/theme.js', ['theme.js', 'text/javascript; charset=utf-8']],
   ['/app.js', ['app.js', 'text/javascript; charset=utf-8']],
   ['/mark.svg', ['mark.svg', 'image/svg+xml']],
   ['/analytics-data.js', ['analytics-data.js', 'text/javascript; charset=utf-8']],

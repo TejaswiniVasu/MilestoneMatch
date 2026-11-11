@@ -26,6 +26,7 @@ let plan;
 let checkoutPending = false;
 let dashboard;
 let dashboardRows = [];
+window.addEventListener('themechange', ({ detail }) => { dashboard?.setTheme(detail.theme); timeline?.setTheme(detail.theme); });
 let dashboardEditing = false;
 let backgroundWaiting = false;
 let backgroundRunId;

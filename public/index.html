@@ -7,6 +7,7 @@
   <meta name="studio-style-nonce" content="__STYLE_NONCE__">
   <title>MilestoneMatch — Freelance payment review</title>
   <link rel="icon" href="/mark.svg" type="image/svg+xml">
+  <script src="/theme.js"></script>
   <link rel="stylesheet" href="/style.css">
   <script type="module" src="/app.js"></script>
 </head>
@@ -30,7 +31,10 @@
       <header class="topbar">
         <div class="frame top-inner">
           <div class="breadcrumb">Workspace <span aria-hidden="true">/</span> <strong>Payment desk</strong></div>
-          <span class="sandbox"><span></span> PayPal Sandbox</span>
+          <div class="top-actions">
+            <label class="theme-control" for="theme-mode"><span>Theme</span><select id="theme-mode" aria-label="Color theme"><option value="light">Light</option><option value="dark">Dark</option><option value="system" selected>System</option></select></label>
+            <span class="sandbox"><span></span> PayPal Sandbox</span>
+          </div>
         </div>
       </header>
   <main class="frame" id="main-content">

@@ -221,3 +221,11 @@ References: [PayPal Orders v2](https://developer.paypal.com/api/orders/v2), [buy
 See [DEMO.md](DEMO.md) for the recording outline and [SUBMISSION.md](SUBMISSION.md)
 for the project description and final checklist. This project uses its local
 classifier and rules; it does not require OpenAI or an OpenAI API key.
+
+## Appearance
+
+Use the header theme selector for **Light**, **Dark**, or **System** (default).
+The choice is saved in this browser and follows OS changes when System is selected.
+Analytics and Gantt update with the workspace without resetting approvals or dates.
+Theme preference also syncs across tabs; unavailable browser storage falls back to
+a working System preference for the current session.

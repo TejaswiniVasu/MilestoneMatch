@@ -73,6 +73,18 @@ function initialState() {
   };
 }
 
+function themeFor(theme) {
+  const dark = theme === 'dark';
+  return studioTheme.withParams({
+    accentColor: dark ? '#b0a5ff' : '#5146d6',
+    backgroundColor: dark ? '#191d2c' : '#ffffff',
+    foregroundColor: dark ? '#e9ecf7' : '#20243a',
+    browserColorScheme: dark ? 'dark' : 'light', fontFamily: 'system-ui, sans-serif',
+    chartPaletteFills1Color: dark ? '#a092ff' : '#5146d6',
+    studioCanvasBackgroundColor: dark ? '#10121d' : '#f5f6fb',
+  });
+}
+
 export function mountDashboard(element, rows, { licenseKey, nonce, onError } = {}) {
   let currentRows = rows;
   if (licenseKey) AgStudioLicenseManager.setLicenseKey(licenseKey);
@@ -95,17 +107,14 @@ export function mountDashboard(element, rows, { licenseKey, nonce, onError } = {
     layout: { minWidth: 240 },
     responsiveLayoutBreakpoints: [{ maxWidth: 640, layout: singleColumnLayout }],
     panels: { view: { left: [], right: [] }, edit: { left: ['data'], right: ['edit'] } },
-    theme: studioTheme.withParams({
-      accentColor: '#22543d', backgroundColor: '#ffffff', foregroundColor: '#182a22',
-      browserColorScheme: 'light', fontFamily: 'system-ui, sans-serif',
-      chartPaletteFills1Color: '#22543d', studioCanvasBackgroundColor: '#f8f7f2',
-    }),
+    theme: themeFor(document.documentElement.dataset.theme),
     loadThemeGoogleFonts: false, styleNonce: nonce,
     onStateUpdated: ({ state }) => { try { sessionStorage.setItem(stateKey, JSON.stringify(state)); } catch { /* The dashboard still works without layout storage. */ } },
     onErrorRaised: (event) => { if (event.fatal) onError?.('The saved dashboard could not load. Use Reset layout to restore it.'); },
   });
   return {
     update(rows) { currentRows = rows; api.setProperty('data', dataFor(rows)); },
+    setTheme(theme) { api.setProperty('theme', themeFor(theme)); },
     setEditing(editing) { api.setProperty('mode', editing ? 'edit' : 'view'); },
     reset() {
       // Recreate rather than animate panel state immediately after a mode change.
