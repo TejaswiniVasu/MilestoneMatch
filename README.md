@@ -7,255 +7,224 @@
 
 **Review the work. Pay with confidence.**
 
-[Live Sandbox demo](https://milestone-match.onrender.com/) · [Verification evidence](EVIDENCE.md) · [Demo recording guide](DEMO.md) · [Submission draft](SUBMISSION.md) · [Deployment guide](RENDER.md)
+An evidence review and payment workspace for freelance web projects. Compare delivery updates with a priced scope, inspect the quoted claims, approve individual milestones, and pay the approved amount through **PayPal Sandbox**.
 
-An evidence review and PayPal Sandbox checkout desk for freelance web projects. Paste the agreed scope and a delivery update. A local model links reported work to individual scope items and surfaces missing, pending, or ambiguous evidence. A reviewer selects the items they accept, then checks out for that exact amount.
+[Open the live demo](https://milestone-match.onrender.com/) · [Verification evidence](EVIDENCE.md) · [Recording guide](DEMO.md) · [Submission draft](SUBMISSION.md)
 
-![MilestoneMatch payment workspace](docs/images/workspace.png)
+![MilestoneMatch workspace with custom branding and indigo theme](docs/images/workspace.png)
 
-## What works
+## Project status
 
-- Evidence matching with source quotes, conservative rules and human approval.
-- PayPal Server SDK checkout for the approved amount, with a downloadable Sandbox payment record.
-- AG Studio review analytics, Bryntum Gantt planning, and Light/Dark/System themes.
-- Channel3 supply research under a separate budget and a checkpointed Render readiness flow.
+The complete project is on **`main`**. As of **11 November 2026**, the hosted review-to-payment flow, analytics, timeline, supply search, and background report have been verified. The project uses a local text classifier and rules; **OpenAI and an OpenAI API key are not required**.
 
-The hosted demo uses synthetic examples and test funds. The free service may take
-about a minute to wake; reviews expire after eight hours or a server restart.
-AG Studio and Bryntum are vendor-licensed evaluation components, not covered by
-this repository's MIT license. Their notices are retained. No OpenAI key is required.
+This is a **hackathon prototype using synthetic data and test funds**. The free Render service may take about a minute to wake. Reviews expire after eight hours or a server restart, so start a fresh review after the service wakes or redeploys.
 
-## Try it in two minutes
+| Feature | Current implementation |
+| --- | --- |
+| Evidence review | Source quotes, explanations, missing/pending/conflicting evidence, and conservative blocking rules |
+| Payment proposal | Whole-item suggestions within a chosen limit, plus a clarification draft; a person applies and approves them |
+| PayPal checkout | Server-calculated USD amount, Sandbox buyer approval, validated capture, and downloadable payment record |
+| AG Studio | Current-review summary, linked status filter, chart, decision grid, and editable layouts |
+| Bryntum Gantt | Editable planned dates, optional scope-order links, payment states, and read-only captured milestones |
+| Channel3 | Refreshed US retailer offers within a separate per-item USD supply budget |
+| Render Workflows | Checkpointed evidence matching, readiness totals, and proposal, with visible run status |
+| Appearance | Custom SVG identity and illustrations; persistent Light, Dark, and System themes |
 
-Install **Node.js 22.9 or newer**, then clone the repository:
+## Try the hosted demo
+
+1. Open [milestone-match.onrender.com](https://milestone-match.onrender.com/).
+2. Click **Load example → Match delivery evidence**.
+3. Read the quoted evidence and expand **Why this decision?**. A match identifies a claim; inspect the underlying work before accepting it.
+4. Select design **$150** and staging deployment **$90**. The desk shows **$240 approved** and **$60 unpaid**.
+5. Use **Continue to PayPal Sandbox**, approve with a personal Sandbox buyer account, return to the same tab, and capture the payment. Download its record once completed.
+
+The $40 mobile/screenshots item has no evidence; the $20 handoff archive is reported as pending. Try the other supplied scenarios for conflicting claims, missing acceptance evidence, ambiguous categories, and payment instructions embedded in delivery text.
+
+The entrant completed a hosted **USD 240.00 Sandbox capture** and supplied its [exported payment record](docs/evidence/sandbox-payment-record.json). The record includes the two approved milestones and USD 60.00 left unpaid. It is a demo export, not a signed PayPal attestation or proof of real-money processing.
+
+## Run locally
+
+Use **Node.js 22.9 or newer** and npm. GitHub CI and Render use Node 22.
 
 ```sh
 git clone https://github.com/TejaswiniVasu/MilestoneMatch.git
 cd MilestoneMatch
-node --version
 npm ci
 npm start
 ```
 
-On Windows PowerShell, use `npm.cmd` in place of `npm` if script execution is restricted.
+Open **http://127.0.0.1:3000**, or the address printed by the server if you changed `PORT`.
 
-Open **http://127.0.0.1:3000**. The server binds to that address. `npm ci` installs
-the pinned dependencies once; `npm start` builds the local analytics bundle before
-starting the app. After installation, the review and dashboard work without
-PayPal credentials or an external AI service.
+`npm start` builds the AG Studio and Gantt browser bundles before starting the server. The core evidence review, proposals, themes, and locally evaluated dashboard/timeline work without external API credentials. PayPal payments, Channel3 search, and remote readiness reports need their respective settings.
 
-1. Click **Load example**, then **Match delivery evidence**.
-2. The $300 example has $150 in design work and a $90 staging deployment with matching delivery claims. Mobile testing ($40) has no evidence. The handoff archive ($20) is reported as pending.
-3. Review the quoted update lines and select the first two items. The totals should show **$240 approved** and **$60 unpaid**. Deselect either line to see the amount change.
+On **Windows PowerShell**, use `npm.cmd` if PowerShell blocks npm scripts:
 
-### Explain, propose, clarify
+```powershell
+npm.cmd ci
+Copy-Item .env.example .env
+notepad .env
+npm.cmd start
+```
 
-Open **Why this decision?** to see reasons, source update identifiers, and the
-next action. In **Review assistant**, set a maximum payment and click **Draft
-payment proposal**. The server proposes eligible whole items in scope order
-within that limit. Applying a proposal only changes the checkbox selection;
-checkout and PayPal buyer approval remain separate actions. Blocked items produce
-a clarification draft you can copy and send yourself.
+On macOS/Linux, use `cp .env.example .env` and edit that file with your preferred editor. Put environment settings **inside the file**, not directly into the shell. Restart the server after changing them. `.env` is ignored by Git.
 
-The scenario picker includes conflicting claims, missing acceptance evidence,
-ambiguous allocation, and approval instructions embedded in delivery text.
-All scenarios are synthetic and can be reviewed without credentials.
+## Configuration
 
-### AG Studio analytics
+Copy [`.env.example`](.env.example) to `.env` for local use. For Render, enter values privately in the web service's **Environment** settings.
 
-After running a review, click **Open analytics**. AG Studio 3.1 displays a custom
-evidence summary, a status filter, a bar chart and a milestone decision grid,
-all backed by the current review. The summary queries Studio's data engine, so
-filtering the status updates it along with the chart and grid. Changes to the
-payment selection and confirmed capture update the data source.
-
-**Selected** is not **captured**: selected amounts remain unpaid until the capture
-is completed. The dashboard's unpaid field means the full amount not yet captured;
-the payment desk's unpaid total means the part outside the current selection.
-
-**Customize layout** enables Studio's edit mode and panels. You can rearrange,
-resize, duplicate and configure widgets. **Reset layout** restores the original
-dashboard. Report settings are saved in this browser tab's session storage;
-the dashboard does not collect a shared portfolio of other users' reviews.
-It has no AI chat or Studio Agent Framework integration yet.
-
-AG Studio is a **commercial dependency**, separate from this project's MIT code.
-[Official licensing guidance](https://www.ag-grid.com/studio/javascript/licence-install/)
-allows local evaluation without a key, with a watermark and console warnings.
-For hosted testing or publication, obtain a trial/commercial license covering
-the application and judging period and configure `AG_STUDIO_LICENSE_KEY` privately.
-Hosted analytics stays disabled until a key is configured. The license is used by
-the browser library as documented; it is not a server-only API secret. This app
-does not suppress licensing warnings or remove watermarks.
-
-The analytics bundle is generated from the npm dependency and is not committed.
-Scripts remain restricted to this origin. Studio style elements receive a nonce;
-a short list of exact pinned vendor stylesheet hashes covers styles for which
-Studio/Charts do not propagate the nonce. Inline style attributes support the
-library's positioning. No external script CDN is required.
-
-## Bryntum delivery planning
-
-After a review, **Open timeline** loads Bryntum Gantt Enterprise 8.0.0. The integration module is TypeScript
-(`studio/timeline.ts`), built with esbuild; `npm run typecheck` checks its types.
-The timeline shows each scope item, its amount, payment state, and planned dates.
-Dates begin as an illustrative schedule, not dates extracted from the agreement.
-Choose a start date and days per milestone, then **Apply planning dates**.
-
-Drag or resize uncaptured milestone bars to adjust the plan. **Fit milestones**
-brings all items into view. Optional scope-order links display dependencies and
-highlight when a preceding milestone remains unpaid. These are visual planning
-links, not automatic rescheduling or enforceable contract/payment restrictions.
-Changing a plan never changes the checkout selection, approves work, creates an
-order, or captures a payment. Captured milestones become read-only. Updating a
-payment selection preserves dragged dates while the page remains open.
-
-Planning dates are temporary: reloads and checkout redirects reset them. They are
-not included in the canonical payment record. Tasks are manually scheduled: links
-are visual planning order, not automatic dependency rescheduling.
-
-Gantt Enterprise runs a fully functional 14-day trial without a key. A registered
-trial key provides 45 days, subject to Bryntum's evaluation terms. Set
-`BRYNTUM_LICENSE_KEY` privately in Render's Environment or in the local `.env`;
-the app passes this browser-visible vendor license to `bryntum.licenseKey` once
-before creating Gantt. Hosted timeline access requires this setting. Do not commit
-keys. If a key does not cover Gantt Enterprise, the vendor may mask the component;
-obtain the correct key instead of suppressing the notice. No real key is bundled.
-Generated vendor bundles, themes and fonts are not committed to this MIT repository.
-
-Potential next Enterprise features: **critical paths** to identify schedule drivers,
-**baselines** to compare a revised plan, and **task editing** for richer planning.
-These are not implemented or claimed by this demo. For richer development guidance,
-install the [Bryntum AI Agent skills](https://github.com/bryntum/skills) and
-[Bryntum MCP Server](https://mcp.bryntum.com). See the
-[Gantt docs](https://bryntum.com/products/gantt-next/docs/?utm_source=ax).
-
-[Official sponsor trial guidance](https://paypalaihackathon.devpost.com/details/bryntum)
-
-## Channel3 project supplies
-
-After running a review, use **Project supplies** to find delivery/testing equipment
-within a separate per-item budget. The server uses `@channel3/sdk` 4.9.0 to search
-US offers in USD, then retrieves each product again before displaying refreshed
-prices, availability and merchant links. Results are not cached. Over-budget,
-out-of-stock, non-USD and unsafe offer links are excluded. Unknown availability
-is labeled explicitly. The UI does not buy products or add their cost to approved
-milestones; retailer links lead to real shops and may be affiliate-tracked.
-
-Set `CHANNEL3_API_KEY` in the local ignored `.env` or Render's Environment, then
-restart/deploy. This key is server-only and never returned by `/api/config`.
-Missing configuration disables only supply search. The demo limits searches to
-30 per hour per running instance, with one search in progress; restarts reset
-that counter. No automatic SDK retries or catalog auto-pagination are enabled.
-Prices exclude unspecified shipping/taxes and may change at the merchant.
-
-The [Channel3 API skill](https://github.com/channel3-ai/skills/tree/main/skills/channel3-api)
-was installed with `npx skills add channel3-ai/skills --skill channel3-api`.
-The ignored local skill files guide server-side auth, SDK search, product refresh
-and affiliate-link handling. Install them again in another development checkout
-for the same guidance. A live API smoke test on November 11, 2026 returned six
-microphone products with refreshed offers within a USD 75 per-item limit; hosted
-search was subsequently verified with six live results and unchanged milestone totals.
-
-## Run a real PayPal Sandbox checkout
-
-1. Sign in to the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/). In **Apps & Credentials**, select **Sandbox**, then use a sandbox REST app associated with a **business** sandbox account. Create one if needed.
-2. Copy `.env.example` to `.env` and add the sandbox app's client ID and secret to `PAYPAL_CLIENT_ID` and `PAYPAL_CLIENT_SECRET`. Keep the credentials in this local file. Git ignores it.
-3. Under **Testing Tools → Sandbox Accounts**, open a separate **personal** sandbox test account and retrieve its test login. PayPal's [sandbox account guide](https://developer.paypal.com/sandbox-testing/accounts) shows where to find these accounts. Judges can use their own free test accounts and credentials.
-4. Restart the server with `npm start`. Open the printed address and rerun the example. Select the two reported deliveries and click **Continue to PayPal Sandbox**.
-5. In the PayPal checkout page, sign in as the **personal sandbox buyer** and approve the $240 order. Keep the same tab open. On return, click **Capture sandbox payment**.
-6. Verify **Payment captured · USD 240.00**, then download the payment record. It includes the review ID, approved and unpaid scope lines, original evidence, and the order and capture IDs.
-
-If the approval page says the checkout has expired, start a fresh review. If the app shows a pending capture, use **Check payment status**. Run the app on a machine that can reach PayPal Sandbox over HTTPS. PayPal processes sandbox transactions using test funds.
-
-For the USD demo, use separate **US Business seller** and **US Personal buyer**
-Sandbox accounts. If checkout reports an unsupported seller currency, check the
-test accounts' regions and receiving settings. Credentials must belong to the
-intended Sandbox seller. Your real PayPal login opens the Developer Dashboard;
-generated Sandbox buyer credentials sign in at test checkout.
-
-The payment download comes from the server's captured review, rather than the
-browser selection. It includes original input, a SHA-256 source fingerprint,
-model version, reasons, totals, and order/capture events. The fingerprint is
-reproducible, **not a digital signature or independent proof of delivery**.
-
-## How the two integrations work
-
-| Component | Role |
+| Variable | Purpose |
 | --- | --- |
-| Local machine learning | Supervised, example-based text classification. The model learns feature weights from 48 labeled synthetic phrases across 12 web-project deliverable categories. Whole words and character trigrams help it recognize phrasing changes. It abstains on weak or ambiguous matches. |
-| Evidence rules | Show the original update text beside each scope line. Detect common pending and negation phrases and flag shared categories that cannot be uniquely allocated. A person reviews and selects the lines to pay. |
-| PayPal Sandbox | PayPal Server SDK 2.5 handles OAuth and Orders v2 create/capture/status reads. The server calculates approved amounts in integer cents, uses distinct idempotency keys, and validates receipt currency, amount and review reference. |
-| UI | Browser-based JavaScript, HTML, and CSS. Checkout state stays in the same tab across the approval redirect. The download pairs the resulting receipt with the selection and source evidence. |
+| `PAYPAL_CLIENT_ID` | Sandbox REST app Client ID |
+| `PAYPAL_CLIENT_SECRET` | Secret from that same Sandbox app; server-only |
+| `CHANNEL3_API_KEY` | Server-only Channel3 product-search credential |
+| `RENDER_API_KEY` | Server-only Render credential for dispatching/checking readiness flows |
+| `RENDER_REVIEW_FLOW_SLUG` | Full registered flow slug, such as `milestone-match-reviews/reviewReadiness`; not a Flow ID |
+| `AG_STUDIO_LICENSE_KEY` | AG Studio evaluation/commercial license; required to enable hosted analytics |
+| `BRYNTUM_LICENSE_KEY` | Gantt Enterprise evaluation/commercial license; required to enable the hosted timeline |
+| `PORT` | Local port; defaults to `3000` |
+| `HOST` | Bind address; defaults to `127.0.0.1`; use `0.0.0.0` for hosting |
+| `APP_ORIGIN` | Optional exact HTTP(S) origin without a path; overrides `RENDER_EXTERNAL_URL` and the local default |
 
-## Validate
+Vendor frontend license keys are passed to their browser libraries for validation. API credentials remain on the server and are not returned by `/api/config`. Do not commit either type of key.
+
+### PayPal Sandbox setup
+
+1. Sign in to the [PayPal Developer Dashboard](https://developer.paypal.com/dashboard/).
+2. Under **Apps & Credentials → Sandbox**, use a REST app attached to a **Business** Sandbox seller. Set its Client ID and Secret on the server.
+3. Under **Sandbox Accounts**, use a separate **Personal** Sandbox buyer for checkout. For this USD demo, US seller and buyer test accounts were used successfully.
+4. Restart/deploy, run a fresh review, select eligible items, approve the order at Sandbox checkout, and capture it on return.
+
+Your real PayPal login opens the Developer Dashboard; generated Sandbox buyer credentials sign in at test checkout. No real card or payment is needed for Sandbox testing.
+
+If the seller rejects the currency, check the Sandbox seller's region and receiving settings. If the review expires, start again. A pending capture exposes **Check payment status** instead of assuming success. See the [Sandbox account guide](https://developer.paypal.com/sandbox-testing/accounts).
+
+## Using the workspace
+
+### Review and payment
+
+Enter scope as one `amount | deliverable` per line and delivery claims as one claim per line. The local classifier maps supported web-project categories; rules flag incomplete, conflicting, ambiguous, or unsupported claims.
+
+**Draft payment proposal** suggests eligible whole items in scope order within your limit. Applying it changes selections only. Checkout, buyer approval, and capture are separate actions. The clarification text is a draft; the app does not send messages.
+
+PayPal Server SDK 2.5.0 handles OAuth and Orders v2 requests. The server calculates amounts in integer cents, coalesces concurrent order/capture requests, uses separate idempotency keys, and checks the capture currency, amount, and review reference. SDK automatic retries and request/response logging are disabled.
+
+The export is built from the server's captured review. It includes original input, source quotes, decision reasons, model version, SHA-256 source fingerprint, totals, and payment events. The fingerprint is **not a digital signature or independent verification of work**.
+
+### Analytics
+
+After a review, choose **Open analytics**. AG Studio shows current-review data through a custom summary widget, linked filter, chart, and grid. **Customize layout** opens the editor; **Reset layout** restores the initial report. Layout settings persist in this tab's session storage.
+
+Selected amounts are proposals, not captured funds. The desk's **Unpaid** total means scope outside the current selection. Analytics' unpaid data means scope not yet captured. No shared portfolio or other users' reviews is collected. **Studio Agent Framework and AI chat are not integrated.**
+
+### Timeline
+
+Choose **Open timeline** to plan dates in Bryntum Gantt. Set a start date and days per item, then use **Apply planning dates**. Drag/resize uncaptured bars or use **Fit milestones**. Optional links show scope order and highlight an unpaid predecessor.
+
+Tasks are manually scheduled: links do not automatically move successors or enforce payment restrictions. Planning changes never approve or pay for work. Captured items become read-only. Dates are temporary, reset on reload/checkout redirects, and are excluded from payment records.
+
+### Project supplies
+
+After a review, search for delivery/testing equipment with a separate per-item budget. Channel3 search is followed by fresh product retrieval before offers are displayed. The app filters over-budget, out-of-stock, non-USD, and unsafe links; missing availability is labeled explicitly.
+
+Offers are for **US retailers in USD**. Shipping/taxes may be additional, prices can change, and retailer links may be affiliate-tracked. Links open real merchant sites. The app does not buy supplies or add their prices to milestone payments.
+
+Search is capped at **30 per hour per running instance**, with one in progress. Counters reset on restart. There is no automatic SDK retry or catalog pagination. The [Channel3 API skill](https://github.com/channel3-ai/skills/tree/main/skills/channel3-api) informed this integration; install it for development with `npx skills add channel3-ai/skills --skill channel3-api`.
+
+### Background readiness report
+
+**Run background report** dispatches a Render flow with three checkpointed steps: evidence matching, readiness totals, and a payment proposal. The app reuses the run for repeated clicks, displays status, and checks the returned report against the current source. No approval or payment happens in the workflow.
+
+A hosted flow succeeded with four milestones, two blocked items, a **$240 proposal**, and **$60 withheld**, while approvals stayed at $0. Runs are capped at **10 per hour per running web instance**. Run history persists in Render, but this app's review-to-run mapping does not survive a web-server restart. See [RENDER.md](RENDER.md) for deployment, usage charges, and verification.
+
+### Themes and branding
+
+Use the header's **Light / Dark / System** selector. System is the default and follows OS changes. Preferences persist in browser local storage and sync across tabs; blocked storage does not prevent theme switching for the current session. Analytics and Gantt update without resetting selections or planned dates.
+
+The logo, favicon, workflow illustration, and empty-state graphic are custom SVGs. The responsive workspace includes keyboard focus indicators, skip navigation, and loading/error states.
+
+## Architecture and dependencies
+
+| Layer | Implementation |
+| --- | --- |
+| Server | Native Node HTTP server; same-origin JSON APIs; in-memory review/payment state |
+| Client | Vanilla JavaScript, HTML, CSS, same-tab checkout restoration |
+| Evidence engine | Local supervised feature-based classifier trained on 48 synthetic phrases across 12 categories, plus deterministic rules |
+| PayPal | `@paypal/paypal-server-sdk` **2.5.0** |
+| Analytics | `ag-studio` **3.1.0** |
+| Planning | Bryntum Gantt/Core/Grid Enterprise **8.0.0**; TypeScript integration |
+| Product research | `@channel3/sdk` **4.9.0** |
+| Background flow | `@renderinc/sdk` **1.8.0**; TypeScript flow definition |
+| Build | esbuild **0.27.0**, TypeScript **5.9.3**, committed npm lockfile |
+
+The browser loads locally built bundles. The content security policy restricts scripts to this origin and uses a style nonce plus exact hashes for pinned vendor styles that do not propagate it. Inline positioning styles are allowed for embedded components.
+
+```text
+public/                   Browser UI, theme controller, SVG identity, data adapters
+studio/                   AG Studio dashboard and TypeScript Gantt integration
+workflows/review.ts       Registered Render readiness flow
+server.mjs                HTTP routes, review lifecycle, checkout and report coordination
+model.mjs / review.mjs     Local matching, conservative rules, approval and proposal logic
+paypal.mjs                PayPal SDK adapter and receipt validation
+channel3.mjs              Server-side search and offer refresh
+render-workflows.mjs       Render dispatch/status adapter
+workflow-report.mjs        Pure readiness calculations shared with the flow
+*.test.mjs                HTTP, payment, provider, and workflow regression tests
+render.yaml               Web service and workflow deployment definitions
+docs/                     Workspace preview and supplied Sandbox payment evidence
+```
+
+## Build and verification
 
 ```sh
+npm ci
+npm run typecheck
+npm run build
 npm test
 npm run evaluate
 ```
 
-The tests cover 12 held-out synthetic paraphrases, two out-of-domain examples, conflicting reports, the approved/unpaid split, same-origin handling, duplicate order and capture requests, a rejected pre-approval capture, and a receipt amount mismatch. The PayPal request tests use an injected HTTP fixture. Follow the Sandbox steps above to validate the external service.
+The GitHub Actions workflow runs these checks on Node 22. There are **19 automated tests** and **23 synthetic evidence regression cases**. Tests cover payment amount/reference validation, duplicate requests, recovery, provider errors, supply filtering/limits, workflow dispatch, mismatched reports, and payment isolation. Provider fixtures are used in automated tests; external Sandbox checkout and hosted integrations were checked separately.
 
-The PayPal adapter now uses the APIMatic-generated `@paypal/paypal-server-sdk`
-at pinned version 2.5.0. Credentials still use the same `.env` names; no new
-account is required. SDK fixtures exercise actual OAuth, serialization and response
-parsing. Additional cases cover failed-token recovery, seller currency errors,
-declines, rate limiting, already-captured recovery and pending status checks.
-Automatic SDK retries and request/response logging are disabled. See
-[APIMATIC.md](APIMATIC.md) for the sponsor Context Plugin source and actual usage.
-Repeat the real Sandbox checkout after updating this payment integration.
+Synthetic regression results are **not a real-world accuracy estimate**. Rules check numeric tokens and selected named requirements such as screenshots, Android, iPhone, and Lighthouse. They do not inspect files, understand every acceptance criterion, or verify delivery. Conservative blocking can reject valid wording.
 
-The evaluation runs 23 synthetic regression cases: negation, partial quantities,
-required devices/screenshots, conflicting claims, payment instructions, and
-unsupported work. It is **not a real-world accuracy estimate**. Category matching
-now requires topical whole-word support. Rules compare numeric tokens and selected
-named requirements (screenshots, Android, iPhone, Lighthouse); they do not inspect
-artifacts or understand every acceptance criterion. Conservative rules can block
-valid claims, including dates or conditional language.
+| Command | What it does |
+| --- | --- |
+| `npm start` | Builds browser bundles via `prestart`, then starts the local app with optional `.env` |
+| `npm run build` | Builds AG Studio/Gantt JS, CSS, and fonts into ignored `public/generated/` |
+| `npm run typecheck` | Checks the Gantt and workflow TypeScript modules |
+| `npm test` | Builds the workflow via `pretest`, then runs Node's test runner |
+| `npm run evaluate` | Runs synthetic evidence regression cases |
+| `npm run build:workflow` | Builds the worker into ignored `generated/` |
+| `npm run start:workflow` | Starts the built flow in the Render workflow runtime |
 
-## Hosted demo
+## Deployment
 
-`render.yaml` configures a single Render service with `/health`. Its build command
-creates the dashboard bundles and runs checks; its runtime command launches
-`node server.mjs` directly so the free 512 MB instance does not rebuild bundles
-through the local `npm start` prestart hook. The public demo is [milestone-match.onrender.com](https://milestone-match.onrender.com/).
-On November 10, 2026, the entrant completed a hosted USD 240.00 Sandbox
-capture and supplied its downloaded record: USD 150 design and USD 90 staging
-approved, with USD 60 remaining unpaid. Set fresh Sandbox credentials privately in Render's environment
-settings. Render supplies `RENDER_EXTERNAL_URL` for callbacks and origin checks.
-For another host, set `HOST=0.0.0.0`, `PORT`, and `APP_ORIGIN` to the exact public
-HTTPS origin without a path. Do not derive it from incoming request headers.
-Re-run Sandbox checkout on the deployed origin before sharing the demo.
+[render.yaml](render.yaml) defines **two services**: the `milestone-match` web app and `milestone-match-reviews` workflow. A new Blueprint can deploy from `main`; the existing hosted demo was configured from `improve-evidence-review`. Confirm the selected branch when syncing updates.
 
-This is a synthetic-data Sandbox demo without production accounts or durable
-storage. Reviews expire after eight hours or any restart; use one instance.
-A sleeping/free host can lose an in-flight review. Do not use real client data.
-Render Workflows readiness reporting is implemented with three checkpointed steps;
-a real hosted run succeeded on November 11, 2026, suggesting USD 240 and
-withholding USD 60 while leaving approvals unchanged. See [RENDER.md](RENDER.md) for setup, usage limits and verification. Channel3 supply search is integrated; its
-server API key must be configured separately on each host. The APIMatic Context Plugin
-was consulted during SDK integration; it is development context, not a runtime
-agent service or an editor-wide installation.
-See [AWARDS.md](AWARDS.md) for readiness and the account checklist.
+The web build installs dependencies, checks types, builds assets, and runs tests/evaluation. Runtime starts with **`node server.mjs`**, avoiding a second large bundle build on the 512 MB instance. `/health` returns the health status. Render supplies `RENDER_EXTERNAL_URL` for callbacks and origin checks.
 
-This prototype targets English-language updates for small web projects. A category match is a reported claim and may miss task-specific details. Use a line per deliverable and verify the underlying artifacts yourself. Reviews live in server memory for up to eight hours. Each review has one checkout selection. The app is designed for local sandbox testing with USD test payments.
+Enter API credentials and evaluation licenses privately on the web service. Register the flow, then configure its full slug and Render API key; do not copy a Flow ID into the slug setting. Workflow runs consume compute/retention credits and may incur charges after credits are exhausted. Follow [RENDER.md](RENDER.md) for the full procedure.
 
-References: [PayPal Orders v2](https://developer.paypal.com/api/orders/v2), [buyer approval flow](https://developer.paypal.com/whats-an-order/), and [REST authentication](https://developer.paypal.com/api/rest/authentication/).
+For another host, build first and set `HOST=0.0.0.0`, the assigned `PORT`, and `APP_ORIGIN` to the exact public HTTPS origin without a path. Use a single web instance while reviews remain in memory.
 
-## Demo recording and submission
+## Limits and licensing
 
-See [DEMO.md](DEMO.md) for the recording outline and [SUBMISSION.md](SUBMISSION.md)
-for the project description and final checklist. This project uses its local
-classifier and rules; it does not require OpenAI or an OpenAI API key.
+- **Prototype scope:** English-language, small web-project delivery updates; USD Sandbox payments. No production payment mode, user authentication, durable database, or autonomous commerce agent.
+- **Temporary state:** reviews last at most eight hours; restarts clear them. Planning dates reset on reload, and checkout restoration depends on the same browser tab. Sleeping/free hosting can interrupt an in-flight review.
+- **Human acceptance:** users must inspect artifacts and explicitly approve work. The model reports claims, not verified completion.
+- **Vendor components:** repository source is [MIT licensed](LICENSE). AG Studio, Bryntum, and other dependencies retain their own licenses; this MIT license does not relicense them. Generated vendor bundles are excluded from Git.
+- **Evaluation access:** local AG Studio evaluation works without a key with vendor notices. Bryntum Enterprise offers a time-limited trial. Hosted analytics/timeline require the corresponding license settings. Trial keys were validated through **26 December 2026** during setup; evaluation terms still apply. Notices are not suppressed. See [AG Studio licensing](https://www.ag-grid.com/studio/javascript/licence-install/) and [Bryntum Gantt documentation](https://bryntum.com/products/gantt-next/docs/).
+- **Data handling:** use synthetic data. Review input/output is sent to Render when a background report runs; supply queries are sent to Channel3. PayPal handles Sandbox checkout. API secrets and license keys are not committed.
 
-## Appearance
+## Hackathon documentation
 
-Use the header theme selector for **Light**, **Dark**, or **System** (default).
-The choice is saved in this browser and follows OS changes when System is selected.
-Analytics and Gantt update with the workspace without resetting approvals or dates.
-Theme preference also syncs across tabs; unavailable browser storage falls back to
-a working System preference for the current session.
+| Document | Purpose |
+| --- | --- |
+| [EVIDENCE.md](EVIDENCE.md) | Verified features and the supplied Sandbox capture record |
+| [SUBMISSION.md](SUBMISSION.md) | Current project description, claims, and submission checklist |
+| [DEMO.md](DEMO.md) | Under-three-minute recording outline and preparation |
+| [AWARDS.md](AWARDS.md) | Sponsor usage, gaps, and award-readiness boundaries |
+| [APIMATIC.md](APIMATIC.md) | Direct use of sponsor-linked Context Plugin skills for the PayPal SDK integration |
+| [RENDER.md](RENDER.md) | Flow deployment, credentials, billing, and verified run |
 
-The brand mark and workflow/empty-state illustrations are custom SVG graphics.
-They scale without raster assets and use theme-aware colors; the mark is also the favicon.
+APIMatic context was consulted directly in development; no editor-wide plugin installation or runtime APIMatic agent is claimed. Studio Agent Framework is not integrated. The public video, actual user-feedback findings, and final Devpost submission remain outstanding. Award eligibility is determined by the organizers.
