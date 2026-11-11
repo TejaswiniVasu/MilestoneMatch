@@ -12,7 +12,10 @@
     "start": "node --env-file-if-exists=.env server.mjs",
     "test": "node --test",
     "evaluate": "node evaluate.mjs",
-    "typecheck": "tsc -p tsconfig.gantt.json"
+    "typecheck": "tsc -p tsconfig.gantt.json && tsc -p tsconfig.workflow.json",
+    "build:workflow": "node build-workflow.mjs",
+    "start:workflow": "node generated/review-workflow.mjs",
+    "pretest": "npm run build:workflow"
   },
   "dependencies": {
     "@bryntum/core-enterprise": "8.0.0",
@@ -20,6 +23,7 @@
     "@bryntum/grid-enterprise": "8.0.0",
     "@channel3/sdk": "4.9.0",
     "@paypal/paypal-server-sdk": "2.5.0",
+    "@renderinc/sdk": "1.8.0",
     "ag-studio": "3.1.0"
   },
   "devDependencies": {

@@ -1,9 +1,12 @@
+import { isDeepStrictEqual } from 'node:util';
 import { createServer } from 'node:http';
 import { readFile } from 'node:fs/promises';
 import { randomBytes, randomUUID } from 'node:crypto';
 import { pathToFileURL } from 'node:url';
 import { approveLines, AppError, draftPlan, parseReview } from './review.mjs';
 import { paypalClient } from './paypal.mjs';
+import { workflowClient } from './render-workflows.mjs';
+import { readinessReport } from './workflow-report.mjs';
 import { channel3Client, supplyRequest } from './channel3.mjs';
 import { sample, scenarios } from './example.mjs';
 
@@ -36,8 +39,9 @@ async function readBody(request) {
   }
 }
 
-export function buildServer({ origin, payments, studioLicenseKey = '', bryntumLicenseKey = '', supplies = channel3Client() }) {
+export function buildServer({ origin, payments, studioLicenseKey = '', bryntumLicenseKey = '', supplies = channel3Client(), workflows = workflowClient() }) {
   const reviews = new Map();
+  let reportWindow = 0, reportCount = 0;
   let supplyWindow = 0, supplyRequests = 0, supplyBusy = false;
   const ttl = 8 * 60 * 60 * 1000;
   return createServer(async (request, response) => {
@@ -70,7 +74,7 @@ export function buildServer({ origin, payments, studioLicenseKey = '', bryntumLi
       }
       if (request.method === 'GET' && pathname === '/api/config') {
         const local = ['localhost', '127.0.0.1', '[::1]'].includes(new URL(origin).hostname);
-        return json(200, { sandboxConfigured: payments.configured, channel3Configured: supplies.configured, sample, scenarios, studioLicenseKey,
+        return json(200, { sandboxConfigured: payments.configured, channel3Configured: supplies.configured, workflowsConfigured: workflows.configured, sample, scenarios, studioLicenseKey,
           studioEnabled: local || Boolean(studioLicenseKey), bryntumLicenseKey, timelineEnabled: local || Boolean(bryntumLicenseKey) });
       }
       if (request.method === 'GET' && pathname === '/health') return json(200, { status: 'ok' });
@@ -90,10 +94,38 @@ export function buildServer({ origin, payments, studioLicenseKey = '', bryntumLi
         return json(201, result);
       }
 
-      const route = /^\/api\/reviews\/([0-9a-f-]{36})\/(order|capture|plan|record|supplies)$/.exec(pathname);
+      const route = /^\/api\/reviews\/([0-9a-f-]{36})\/(order|capture|plan|record|supplies|report|report-status)$/.exec(pathname);
       if (!route) throw new AppError(404, 'This endpoint does not exist.');
       const review = reviews.get(route[1]);
       if (!review || review.expiresAt <= Date.now()) throw new AppError(404, 'This review expired. Run the review again.');
+      if (route[2] === 'report') {
+        if (!workflows.configured) throw new AppError(503, 'Configure Render Workflows to run a background report.');
+        if (review.reportStarting) return json(202, { status: 'submitting' });
+        if (review.reportRunId) return json(202, { status: 'pending', runId: review.reportRunId });
+        if (Date.now() - reportWindow > 3_600_000) { reportWindow = Date.now(); reportCount = 0; }
+        if (reportCount >= 10) throw new AppError(429, 'The demo background-report limit was reached. Try later.');
+        reportCount++; review.reportStarting = true;
+        try {
+          review.reportRunId = await workflows.start(review.source, review.id);
+          return json(202, { status: 'pending', runId: review.reportRunId });
+        } finally { review.reportStarting = false; }
+      }
+      if (route[2] === 'report-status') {
+        if (!review.reportRunId) throw new AppError(409, 'Start the background report first.');
+        if (review.backgroundReport) return json(200, { status: 'succeeded', runId: review.reportRunId, report: review.backgroundReport });
+        if (review.reportPoll) return json(202, { status: 'running', runId: review.reportRunId });
+        if (review.lastReportPoll && Date.now() - review.lastReportPoll < 1800) return json(202, { status: 'running', runId: review.reportRunId });
+        review.lastReportPoll = Date.now(); review.reportPoll = true;
+        try {
+          const result = await workflows.status(review.reportRunId);
+          if (result.status === 'succeeded') {
+            const expected = readinessReport(review.source);
+            if (!isDeepStrictEqual(result.report, expected)) throw new AppError(502, 'The background report does not match this review. Check that the web app and workflow use the same commit.');
+            review.backgroundReport = expected;
+          }
+          return json(200, { ...result, runId: review.reportRunId });
+        } finally { review.reportPoll = false; }
+      }
       if (route[2] === 'supplies') {
         supplyRequest(body);
         if (!supplies.configured) throw new AppError(503, 'Configure CHANNEL3_API_KEY on the server to search project supplies.');
@@ -174,7 +206,7 @@ if (process.argv[1] && import.meta.url === pathToFileURL(process.argv[1]).href) 
     clientSecret: process.env.PAYPAL_CLIENT_SECRET,
     origin,
   });
-  buildServer({ origin, payments, studioLicenseKey: process.env.AG_STUDIO_LICENSE_KEY, bryntumLicenseKey: process.env.BRYNTUM_LICENSE_KEY, supplies: channel3Client({ apiKey: process.env.CHANNEL3_API_KEY }) }).listen(port, host, () => {
+  buildServer({ origin, payments, studioLicenseKey: process.env.AG_STUDIO_LICENSE_KEY, bryntumLicenseKey: process.env.BRYNTUM_LICENSE_KEY, supplies: channel3Client({ apiKey: process.env.CHANNEL3_API_KEY }), workflows: workflowClient({ apiKey: process.env.RENDER_API_KEY, flowSlug: process.env.RENDER_REVIEW_FLOW_SLUG }) }).listen(port, host, () => {
     console.log('MilestoneMatch at ' + origin);
   });
 }

@@ -27,6 +27,8 @@ let checkoutPending = false;
 let dashboard;
 let dashboardRows = [];
 let dashboardEditing = false;
+let backgroundWaiting = false;
+let backgroundRunId;
 let supplySearching = false;
 let supplyGeneration = 0;
 let timeline;
@@ -79,6 +81,7 @@ function updateTotals() {
   if (apply) apply.disabled = Boolean(order) || checkoutPending || !plan?.proposedIds.length;
   dashboardRows = analyticsRows(review, [...selected], receipt);
   dashboard?.update(dashboardRows);
+  byId('run-background').disabled = !review || !config.workflowsConfigured || backgroundWaiting;
   byId('search-supplies').disabled = !review || !config.channel3Configured || supplySearching;
   byId('show-analytics').disabled = !review || config.studioEnabled === false;
   byId('show-analytics').title = config.studioEnabled === false
@@ -169,6 +172,11 @@ function saveCheckout() {
 }
 
 function clearReview() {
+  backgroundRunId = undefined;
+  byId('run-background').disabled = true;
+  byId('background-result').replaceChildren();
+  byId('background-status').textContent = 'Run a review first.';
+  showError('background-error');
   supplyGeneration++;
   byId('supply-results').replaceChildren();
   showError('supplies-error');
@@ -449,6 +457,44 @@ byId('export').addEventListener('click', async () => {
   } finally { byId('export').disabled = false; }
 });
 
+byId('run-background').addEventListener('click', async () => {
+  if (!review || backgroundWaiting || !config.workflowsConfigured) return;
+  const current = review;
+  backgroundWaiting = true;
+  byId('run-background').disabled = true;
+  showError('background-error');
+  byId('background-status').textContent = 'Submitting the background readiness report…';
+  try {
+    const job = await post('/api/reviews/' + current.id + '/report', {});
+    backgroundRunId = job.runId;
+    const deadline = Date.now() + 150000;
+    while (review === current && Date.now() < deadline) {
+      await new Promise(resolve => setTimeout(resolve, 2500));
+      if (review !== current) return;
+      const result = await post('/api/reviews/' + current.id + '/report-status', {});
+      if (review !== current) return;
+      backgroundRunId = result.runId;
+      if (result.status === 'failed') throw new Error('The background run failed. Check its run in Render. Normal review remains available.');
+      byId('background-status').textContent = `Render run ${backgroundRunId} · ${result.status}`;
+      if (result.status === 'succeeded') {
+        const report = result.report;
+        byId('background-result').replaceChildren(
+          node('p', '', `${report.itemCount} milestones · ${report.blockedCount} need evidence · ${money(report.blockedCents)} withheld from this proposal.`),
+          node('p', '', `Suggested after human inspection: ${money(report.proposal.amount)}. No approval or payment was made.`),
+          node('p', '', report.proposal.clarification || 'No clarification request in this report.'),
+        );
+        return;
+      }
+    }
+    if (review === current) byId('background-status').textContent = `Render run ${backgroundRunId} is still processing. Click again to check the same run.`;
+  } catch (error) {
+    if (review === current) showError('background-error', error.message);
+  } finally {
+    backgroundWaiting = false;
+    byId('run-background').disabled = !review || !config.workflowsConfigured;
+  }
+});
+
 byId('supplies-form').addEventListener('submit', async (event) => {
   event.preventDefault();
   if (!review || supplySearching || !config.channel3Configured) return;
@@ -490,6 +536,7 @@ byId('supplies-form').addEventListener('submit', async (event) => {
 });
 
 config = await configReady;
+if (!config.workflowsConfigured) byId('background-status').textContent = 'Background reports need a Render Workflows connection. Normal review remains available.';
 if (!config.channel3Configured) byId('supplies-status').textContent = 'Supply search needs a Channel3 connection. Review and PayPal checkout remain available.';
 for (const example of config.scenarios ?? []) {
   const option = node('option', '', example.label);

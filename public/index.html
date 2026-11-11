@@ -134,8 +134,16 @@
       <div id="milestone-timeline" aria-label="Planned milestone dates and payment status"></div>
       <p class="field-help">Planning dates are temporary and reset on reload. They are separate from the payment record. Evaluation use only; vendor trial notices remain visible when applicable.</p>
     </section>
+    <section class="card" id="background-panel" aria-labelledby="background-title">
+      <div class="card-heading"><div><p class="eyebrow">06 / BACKGROUND READINESS REPORT</p><h2 id="background-title">Prepare the next review</h2></div><span class="model-badge">RENDER WORKFLOWS</span></div>
+      <p class="ledger-note">Run evidence matching, readiness totals and a payment proposal as checkpointed background steps. The report uses the same local model and rules. You still inspect the work and approve payments yourself.</p>
+      <button class="button primary" id="run-background" type="button" disabled>Run background report</button>
+      <p id="background-status" class="field-help" role="status">Run a review first.</p>
+      <p id="background-error" class="error" role="alert" hidden></p>
+      <div id="background-result"></div>
+    </section>
     <section class="card" id="supplies-panel" aria-labelledby="supplies-title">
-      <div class="card-heading"><div><p class="eyebrow">06 / PROJECT SUPPLIES</p><h2 id="supplies-title">Find supplies for the next milestone</h2></div><span class="model-badge">CHANNEL3</span></div>
+      <div class="card-heading"><div><p class="eyebrow">07 / PROJECT SUPPLIES</p><h2 id="supplies-title">Find supplies for the next milestone</h2></div><span class="model-badge">CHANNEL3</span></div>
       <p class="ledger-note">Find equipment for delivery or testing. Review results against a separate per-item budget; supply prices never change your approved milestone total.</p>
       <form id="supplies-form">
         <label for="supply-query">What does this project need?</label>

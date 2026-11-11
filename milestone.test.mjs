@@ -264,3 +264,21 @@ test('supply research is review-scoped, rate limited and does not change payment
   assert.equal((await request(server, '/api/reviews/' + review.id + '/record', {})).code, 409);
   assert.equal((await request(server, '/api/reviews/' + review.id + '/plan', { budgetCents: 24000 })).code, 200);
 });
+
+test('background report starts once, rejects foreign results and cannot create a payment', async () => {
+  let calls = 0;
+  let result = { status: 'succeeded', report: { sourceHash: 'wrong-review' } };
+  const server = buildServer({ origin, payments: { configured: false }, workflows: {
+    configured: true,
+    async start(input) { calls++; assert.deepEqual(input, sample); return 'frn-test123'; },
+    async status() { return result; },
+  } });
+  const review = (await request(server, '/api/reviews', sample)).body;
+  const base = '/api/reviews/' + review.id;
+  assert.equal((await request(server, base + '/report-status', {})).code, 409);
+  const starts = await Promise.all([request(server, base + '/report', {}), request(server, base + '/report', {})]);
+  assert.equal(starts[0].code, 202);
+  assert.equal(calls, 1);
+  assert.equal((await request(server, base + '/report-status', {})).code, 502);
+  assert.equal((await request(server, base + '/record', {})).code, 409);
+});

@@ -35,8 +35,8 @@ sponsor or adding a dependency is not evidence of a competitive integration.
 | Best Use of AG Grid | Local AG Studio dashboard with a custom summary, filtering, theming and layout editing | Obtain trial for hosting/judging; add and validate meaningful Studio Agent Framework behavior and richer agency data |
 | Best Use of APIMatic | Sponsor-linked Context Plugin skills consulted for the PayPal Server SDK 2.5 migration and recovery/error handling; provenance recorded in APIMATIC.md | Hosted Sandbox checkout and record verified by entrant; retain evidence and confirm organizer eligibility; no editor-wide plugin installation is claimed |
 | Best Use of Bryntum | Gantt Enterprise 8.0.0 with editable planned dates, dependency links and capture-aware read-only items | Configure and verify the Gantt trial key on Render; add durable schedules and richer dependency handling; do not claim automatic rescheduling |
-| Best Use of Channel3 | SDK product search and refreshed US/USD offers within a separate equipment budget; live API call verified | Configure the key on Render and verify hosted search; collect actual user feedback |
-| Best Use of Render | Live Render web service with entrant-verified USD 240 Sandbox capture and record | Add/test meaningful Workflows orchestration for evidence jobs; hosting alone does not establish award eligibility |
+| Best Use of Channel3 | SDK product search and refreshed US/USD offers within a separate equipment budget; live API call verified | Hosted search verified with six results; collect actual user feedback |
+| Best Use of Render | Live Render web service with entrant-verified USD 240 Sandbox capture and record | Three-step readiness flow implemented and fixture-tested; deploy workflow, configure private API key/flow slug, verify real run history; eligibility remains the organizers’ decision |
 
 ## Entrant account setup
 

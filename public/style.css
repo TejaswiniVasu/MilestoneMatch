@@ -123,3 +123,5 @@ summary { cursor: pointer; font-weight: 700; }
 .supply-card { border: 1px solid var(--line, #d9e1d8); border-radius: 12px; padding: 18px; overflow-wrap: anywhere; }
 .supply-card h3 { font-size: 1rem; }
 .supply-card a { color: #225b43; }
+
+#background-panel { margin-top: 24px; }

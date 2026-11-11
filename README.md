@@ -128,7 +128,7 @@ The ignored local skill files guide server-side auth, SDK search, product refres
 and affiliate-link handling. Install them again in another development checkout
 for the same guidance. A live API smoke test on November 11, 2026 returned six
 microphone products with refreshed offers within a USD 75 per-item limit; hosted
-search still needs its private Render environment setting and verification.
+search was subsequently verified with six live results and unchanged milestone totals.
 
 ## Run a real PayPal Sandbox checkout
 
@@ -204,7 +204,9 @@ Re-run Sandbox checkout on the deployed origin before sharing the demo.
 This is a synthetic-data Sandbox demo without production accounts or durable
 storage. Reviews expire after eight hours or any restart; use one instance.
 A sleeping/free host can lose an in-flight review. Do not use real client data.
-Render Workflows is not implemented. Channel3 supply search is integrated; its
+Render Workflows readiness reporting is implemented with three checkpointed steps;
+its separate workflow deployment, API key and flow slug still need a real hosted
+run. See [RENDER.md](RENDER.md) for setup, usage limits and verification. Channel3 supply search is integrated; its
 server API key must be configured separately on each host. The APIMatic Context Plugin
 was consulted during SDK integration; it is development context, not a runtime
 agent service or an editor-wide installation.

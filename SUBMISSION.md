@@ -54,7 +54,15 @@ A reviewer can research equipment for delivery/testing within a separate per-ite
 budget. Server-side SDK search is followed by fresh product retrieval. Results
 show merchant prices, availability and affiliate retailer links. No retail
 purchase is automated, and supply prices never alter the service payment. Live
-API results were verified in development; hosted configuration must be checked.
+API results and hosted search were verified; milestone payment totals stayed unchanged.
+
+**How Render Workflows is used**
+A readiness flow checkpoints evidence matching, blocked-work totals and a payment
+proposal. The web app dispatches it once per review with an idempotency key,
+shows run status, and checks the returned report against the current source.
+Normal review remains available without workflow credentials. The function and
+UI have fixture checks; a real deployed workflow run still needs verification.
+See [RENDER.md](RENDER.md). No payment runs inside the workflow.
 
 **How AI is used**  
 The model maps differently worded scope and update lines into supported deliverable categories using learned text feature weights. It can abstain. Rules flag pending language and ambiguous evidence, and the reviewer makes the acceptance decision.
@@ -102,8 +110,8 @@ The official judging rubric gives equal weight to implementation, design, impact
   result as real-world AI accuracy.
 - A SHA-256 source fingerprint is not a digital signature.
 - AG Studio and Bryntum have verified hosted evaluation integrations, and APIMatic context was
-  used for the SDK migration. Channel3 supply search is integrated; Render Workflows and Studio's
-  agent framework remain pending. Do not claim roadmap features as implemented.
+  used for the SDK migration. Channel3 supply search is verified online. Render Workflows is implemented
+  but awaits a deployed run; Studio's agent framework remains pending. Do not claim roadmap features as implemented.
   See [AWARDS.md](AWARDS.md) for the exact status and licensing prerequisites.
 - Real user feedback, a recorded video and
   final Devpost submission remain outstanding.

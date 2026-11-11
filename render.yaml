@@ -17,3 +17,12 @@ services:
         sync: false
       - key: PAYPAL_CLIENT_SECRET
         sync: false
+  - type: workflow
+    name: milestone-match-reviews
+    runtime: node
+    region: oregon
+    buildCommand: npm ci --include=dev && npm run typecheck && npm run build:workflow && npm test
+    startCommand: npm run start:workflow
+    envVars:
+      - key: NODE_VERSION
+        value: "22"
