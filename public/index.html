@@ -15,7 +15,7 @@
   <a class="skip-link" href="#main-content">Skip to workspace</a>
   <div class="app-shell">
     <aside class="sidebar" aria-label="Workspace navigation">
-      <a class="brand" href="/"><img src="/mark.svg" width="32" height="32" alt="">MilestoneMatch</a>
+      <a class="brand" href="/" aria-label="MilestoneMatch home"><img src="/mark.svg" width="36" height="36" alt=""><span class="brand-lockup"><strong>MilestoneMatch</strong><small>REVIEW &amp; PAYMENTS</small></span></a>
       <div class="sidebar-caption">CLIENT WORKSPACE</div>
       <nav class="workspace-nav" aria-label="Project tools">
         <a class="nav-item nav-current" href="#workspace"><svg class="nav-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 4h16v16H4z M8 8h8 M8 12h8 M8 16h5"/></svg>Payment desk</a>
@@ -46,11 +46,41 @@
         <p class="lede">Match a delivery update to the agreed scope. Review the evidence, approve individual items, and pay the approved total.</p>
       </div>
       <div class="intro-side" aria-label="Review process">
-        <p class="eyebrow">YOUR REVIEW WORKFLOW</p>
+        <div class="workflow-artwork">
+          <span class="art-label">A CLEAR PATH TO PAYMENT</span>
+          <svg class="workflow-art" viewBox="0 0 360 174" fill="none" role="img" aria-labelledby="workflow-art-title">
+            <title id="workflow-art-title">Agreed scope and delivery evidence come together for a human approval decision</title>
+            <defs>
+              <linearGradient id="flow-card" x1="123" y1="24" x2="236" y2="157" gradientUnits="userSpaceOnUse"><stop stop-color="#8B7AF3"/><stop offset="1" stop-color="#5146D6"/></linearGradient>
+            </defs>
+            <path class="art-track" d="M70 87h220" stroke-width="1.5" stroke-dasharray="4 5"/>
+            <circle class="art-orbit" cx="180" cy="87" r="74" stroke-dasharray="2 6"/>
+            <g transform="translate(22 44) rotate(-9 43 44)">
+              <rect class="art-paper-shadow" x="3" y="5" width="86" height="91" rx="12"/>
+              <rect class="art-paper" width="86" height="91" rx="12"/>
+              <rect class="art-soft" x="14" y="14" width="22" height="22" rx="6"/>
+              <path class="art-accent-stroke" d="M21 20h9M21 25h9M21 30h5" stroke-width="1.8" stroke-linecap="round"/>
+              <path class="art-muted-stroke" d="M15 49h55M15 59h43M15 69h49" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <rect x="125" y="31" width="110" height="117" rx="20" fill="url(#flow-card)"/>
+            <rect x="130" y="36" width="100" height="107" rx="16" stroke="white" stroke-opacity=".2"/>
+            <path d="M150 111V67h11l19 24 19-24h11v44h-13V89l-17 21-17-21v22h-13Z" fill="white"/>
+            <g transform="translate(250 44) rotate(9 43 44)">
+              <rect class="art-paper-shadow" x="3" y="5" width="86" height="91" rx="12"/>
+              <rect class="art-paper" width="86" height="91" rx="12"/>
+              <circle cx="29" cy="27" r="13" class="art-check-bg"/>
+              <path d="m23 27 4 4 8-9" class="art-check-stroke" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+              <path class="art-muted-stroke" d="M15 49h55M15 59h43M15 69h49" stroke-width="3" stroke-linecap="round"/>
+            </g>
+            <circle cx="232" cy="36" r="15" class="art-check-bg"/>
+            <path d="m225 36 5 5 9-10" class="art-check-stroke" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="art-accent-stroke" d="M102 30v9M98 34h9M260 145v8M256 149h8" stroke-width="1.5" stroke-linecap="round"/>
+          </svg>
+        </div>
         <ol>
-          <li><span>01</span> Add scope and update</li>
-          <li><span>02</span> Review AI evidence matches</li>
-          <li><span>03</span> Approve and pay in Sandbox</li>
+          <li><span>01</span> Scope</li>
+          <li><span>02</span> Evidence</li>
+          <li><span>03</span> Your decision</li>
         </ol>
       </div>
     </section>
@@ -82,11 +112,17 @@
           <span class="model-badge">LOCAL AI</span>
         </div>
         <div id="empty" class="empty">
-          <svg viewBox="0 0 64 64" width="57" height="57" fill="none" aria-hidden="true">
-            <rect x="13" y="9" width="38" height="46" rx="6" stroke="currentColor" stroke-width="2"/>
-            <path d="M23 23h18M23 32h18M23 41h12" stroke="currentColor" stroke-width="2" stroke-linecap="round"/>
-            <circle cx="49" cy="48" r="8" fill="#e1eddd" stroke="currentColor" stroke-width="2"/>
-            <path d="m46 48 2 2 4-4" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+          <svg class="empty-art" viewBox="0 0 180 120" fill="none" aria-hidden="true">
+            <ellipse class="art-soft" cx="90" cy="101" rx="67" ry="9"/>
+            <rect class="art-paper" x="35" y="24" width="65" height="75" rx="10" transform="rotate(-10 35 24)"/>
+            <path class="art-muted-stroke" d="m46 42 31-5M48 53l31-5M50 64l20-3" stroke-width="3" stroke-linecap="round"/>
+            <rect class="art-paper" x="78" y="15" width="65" height="82" rx="10" transform="rotate(7 78 15)"/>
+            <rect class="art-soft" x="89" y="30" width="26" height="22" rx="5" transform="rotate(7 89 30)"/>
+            <path class="art-accent-stroke" d="m97 41 4 4 8-8" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="art-muted-stroke" d="m88 63 32 4M87 74l24 3" stroke-width="3" stroke-linecap="round"/>
+            <circle cx="137" cy="87" r="19" class="art-check-bg"/>
+            <path d="m129 87 6 6 11-13" class="art-check-stroke" stroke-width="2.7" stroke-linecap="round" stroke-linejoin="round"/>
+            <path class="art-accent-stroke" d="M31 70v10M26 75h10M143 25v8M139 29h8" stroke-width="1.5" stroke-linecap="round"/>
           </svg>
           <h3>Scope and evidence, side by side</h3>
           <p>Run a review to see which items have a delivery claim, which are pending, and which need more evidence.</p>

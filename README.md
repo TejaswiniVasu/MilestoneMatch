@@ -229,3 +229,6 @@ The choice is saved in this browser and follows OS changes when System is select
 Analytics and Gantt update with the workspace without resetting approvals or dates.
 Theme preference also syncs across tabs; unavailable browser storage falls back to
 a working System preference for the current session.
+
+The brand mark and workflow/empty-state illustrations are custom SVG graphics.
+They scale without raster assets and use theme-aware colors; the mark is also the favicon.

@@ -245,3 +245,49 @@ footer { display: flex; justify-content: space-between; gap: 12px; flex-wrap: wr
 :root[data-theme="dark"] .primary:hover:enabled { background: #a092ff; }
 @media (max-width: 730px) { .theme-control > span { display: none; } .top-actions { gap: 8px; } .breadcrumb { font-size: 10px; } .breadcrumb span { margin-inline: 4px; } }
 @media (max-width: 370px) { .breadcrumb { max-width: 77px; line-height: 1.5; } .sandbox { font-size: 9px; } }
+
+/* MilestoneMatch identity: matched documents and a decision checkpoint. */
+.brand { gap: 9px; padding-inline: 4px; }
+.brand img { width: 36px; height: 36px; padding: 0; border-radius: 11px; background: none; filter: drop-shadow(0 3px 7px #00000020); }
+.brand-lockup { display: grid; gap: 3px; min-width: 0; }
+.brand-lockup strong { font-size: 15px; font-weight: 700; letter-spacing: -.5px; line-height: 1.2; }
+.brand-lockup small { font-size: 7px; font-weight: 550; letter-spacing: .17em; line-height: 1.4; color: var(--sidebar-muted); }
+.intro { gap: 30px; padding-top: 32px; padding-bottom: 28px; }
+.intro-side { max-width: 360px; border: 0; padding: 0; }
+.workflow-artwork { position: relative; border: 1px solid var(--line); border-radius: 16px; overflow: hidden; background: radial-gradient(ellipse at 50% 80%, var(--soft-green), transparent 75%), var(--surface); }
+.workflow-artwork::before { content: ''; position: absolute; inset: 0; pointer-events: none; opacity: .35; background-image: radial-gradient(var(--subtle-icon) .65px, transparent .65px); background-size: 16px 16px; }
+.art-label { display: block; position: relative; text-align: center; font-size: 8px; letter-spacing: .16em; color: var(--muted); font-weight: 650; padding-top: 17px; }
+.workflow-art { position: relative; width: 100%; height: auto; display: block; }
+.art-track { stroke: var(--accent-border); }
+.art-orbit { stroke: var(--line); }
+.art-paper { fill: var(--surface); stroke: var(--line); stroke-width: 1.2; }
+.art-paper-shadow { fill: var(--soft-green); }
+.art-soft { fill: var(--soft-green); }
+.art-accent-stroke { stroke: var(--green); }
+.art-muted-stroke { stroke: var(--line); }
+.art-check-bg { fill: var(--success-soft); stroke: var(--success-border); }
+.art-check-stroke { stroke: var(--success); }
+.intro-side ol { grid-template-columns: auto auto auto; gap: 8px; margin-top: 13px; }
+.intro-side li { gap: 6px; font-size: 10px; white-space: nowrap; }
+.intro-side li span { height: 20px; width: 20px; font-size: 8px; }
+.empty .empty-art { width: 180px; height: 120px; background: none; padding: 0; border-radius: 0; margin-bottom: 3px; }
+.card-heading h2 { font-weight: 680; }
+@media (max-width: 1150px) and (min-width: 731px) {
+  .brand { gap: 7px; }
+  .brand img { width: 30px; height: 30px; }
+  .brand-lockup strong { font-size: 13px; }
+  .brand-lockup small { font-size: 6px; }
+  .intro { gap: 22px; }
+  .intro-side li { gap: 4px; font-size: 9px; }
+  .intro-side li span { width: 17px; height: 17px; font-size: 7px; }
+}
+@media (max-width: 730px) {
+  .brand-lockup strong { font-size: 17px; }
+  .brand-lockup small { font-size: 7px; }
+  .intro-side { max-width: 360px; width: 100%; justify-self: center; }
+  .intro { gap: 22px; }
+  .workflow-art { max-height: 150px; }
+  .art-label { padding-top: 13px; }
+  .intro-side ol { margin-top: 12px; justify-content: space-between; }
+  .intro-side li { font-size: 10px; }
+}
